@@ -1,12 +1,15 @@
 # Fork of Mikan 🍊
 
 The youtuber Jouzu Juls made an extension to track time while immersing.
-This is a fork of that extension, mostly made with AI, that supports other website than youtube, see below.
+This is a fork of that extension, mostly made with AI, that supports other website than youtube, [see below](https://github.com/ch-dewez/mikan/blob/main/README.md#supported-websites).
+
+## Permission
+This extension need to read the page to detect video element and/or the extension asbplayer. It requires the permission to do so. If it is not enabled by default, you need to allow it in the extension settings.
 
 ## Supported websites
 - [youtube](youtube.com)
 - [comprehensible japanese](cijapanese.com)
-- asbplyer: on every website, if asbplayer is loaded, this extension will search for a video element and based on that track time.
+- asbplayer: on every website, if asbplayer is loaded, this extension will search for a video element and based on that track time.
 - other coming soon(?)
 
 ## Work in Progress
