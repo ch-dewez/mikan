@@ -1,7 +1,8 @@
 let watchData = {};
 let darkModeEnabled = false;
+let websiteStats = [];
 
-const isExtension = typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local;
+const isExtension = typeof browser !== 'undefined' && browser.storage && browser.storage.local;
 
 function formatTime(seconds) {
   seconds = Math.floor(seconds);
@@ -353,19 +354,42 @@ function buildMonthlyChart() {
   }
 }
 
+function buildWebsiteList() {
+  const container = document.getElementById('website-list');
+  if (!container) return; // Ensure the container exists
+  container.innerHTML = ''; // Clear previous content
+
+  websiteStats.forEach(website => {
+    const websiteItem = document.createElement('div');
+    websiteItem.className = 'website-item';
+
+    const websiteName = document.createElement('span');
+    websiteName.className = 'website-name';
+    websiteName.textContent = website.host;
+
+    const websiteTime = document.createElement('span');
+    websiteTime.className = 'website-time';
+    websiteTime.textContent = formatTimeVerbose(website.totalSeconds);
+
+    websiteItem.appendChild(websiteName);
+    websiteItem.appendChild(websiteTime);
+    container.appendChild(websiteItem);
+  });
+}
+
 function init() {
   // Set up dark mode toggle
   document.getElementById('dark-mode-btn').addEventListener('click', () => {
     darkModeEnabled = !darkModeEnabled;
     if (isExtension) {
-      chrome.storage.local.set({ darkModeEnabled });
+      browser.storage.local.set({ darkModeEnabled });
     }
     updateDarkModeUI();
   });
   
   if (isExtension) {
     // Load initial data including dark mode setting
-    chrome.storage.local.get(['watchData', 'darkModeEnabled'], (result) => {
+    browser.storage.local.get(['watchData', 'darkModeEnabled'], (result) => {
       watchData = result.watchData || {};
       darkModeEnabled = result.darkModeEnabled === true;
       updateDarkModeUI();
@@ -373,7 +397,7 @@ function init() {
     });
     
     // Listen for changes
-    chrome.storage.onChanged.addListener((changes) => {
+    browser.storage.onChanged.addListener((changes) => {
       if (changes.watchData) {
         watchData = changes.watchData.newValue || {};
         render();
@@ -389,11 +413,33 @@ function init() {
   }
 }
 
+function calculateWebsiteStats() {
+  const aggregatedWebsiteData = {};
+
+  for (const dateStr in watchData) {
+    const dayData = watchData[dateStr];
+    if (dayData && dayData.websites) {
+      for (const host in dayData.websites) {
+        if (!aggregatedWebsiteData[host]) {
+          aggregatedWebsiteData[host] = 0;
+        }
+        aggregatedWebsiteData[host] += dayData.websites[host].totalSeconds;
+      }
+    }
+  }
+
+  websiteStats = Object.entries(aggregatedWebsiteData)
+    .map(([host, totalSeconds]) => ({ host, totalSeconds }))
+    .sort((a, b) => b.totalSeconds - a.totalSeconds);
+}
+
 function render() {
+  calculateWebsiteStats();
   calculateStats();
   buildHeatmap();
   buildWeeklyChart();
   buildMonthlyChart();
+  buildWebsiteList(); // Call the new function to build the website list
 }
 
 init();

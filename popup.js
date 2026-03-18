@@ -48,7 +48,7 @@ function updateDarkModeUI() {
 }
 
 function updateStats() {
-  chrome.storage.local.get(['watchData'], (result) => {
+  browser.storage.local.get(['watchData'], (result) => {
     const watchData = result.watchData || {};
     const today = getLocalDateString();
     const weekStart = getWeekStart();
@@ -84,12 +84,12 @@ function updateStats() {
     document.getElementById('week-time').textContent = formatTime(weekSeconds);
     document.getElementById('month-time').textContent = formatTime(monthSeconds);
     
-    chrome.storage.local.set({ cachedTotalSeconds: totalSeconds });
+    browser.storage.local.set({ cachedTotalSeconds: totalSeconds });
   });
 }
 
 function updateStatus() {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const tab = tabs[0];
     const statusCard = document.getElementById('status-card');
     const statusText = document.getElementById('status-text');
@@ -104,33 +104,23 @@ function updateStatus() {
       return;
     }
     
-    if (!tab.url.includes('youtube.com')) {
-      statusCard.className = 'card status-card inactive';
-      statusText.textContent = 'Not on YouTube';
-      statusSubtext.textContent = '';
-      forceBtn.style.display = 'none';
-      return;
-    }
-    
-    if (!tab.url.includes('youtube.com/watch') && !tab.url.includes('youtube.com/shorts/')) {
-      statusCard.className = 'card status-card inactive';
-      statusText.textContent = 'Not on a video page';
-      statusSubtext.textContent = 'Navigate to a video to track';
-      forceBtn.style.display = 'none';
-      return;
-    }
-    
-    currentTabId = tab.id;
-    
-    chrome.tabs.sendMessage(tab.id, { type: 'getStatus' }, (response) => {
+    browser.tabs.sendMessage(tab.id, { type: 'getStatus' }, (response) => {
+	  if (browser.runtime.lastError) {
+		statusCard.className = 'card status-card inactive';
+		statusText.textContent = 'Not on a supported page';
+		statusSubtext.textContent = '';
+		forceBtn.style.display = 'none';
+		return;
+	  }
+	  
 	  console.log('Mikan popup received:', response);
-      if (chrome.runtime.lastError || !response) {
+      if (!response) {
         statusCard.className = 'card status-card inactive';
         statusText.textContent = 'Extension not loaded';
         statusSubtext.textContent = 'Try refreshing the page';
         forceBtn.style.display = 'none';
 		
-		chrome.runtime.sendMessage({ type: 'updateIcon', state: 'error', tabId: tab.id });
+		browser.runtime.sendMessage({ type: 'updateIcon', state: 'error', tabId: tab.id });
         return;
       }
       
@@ -160,34 +150,36 @@ function updateStatus() {
 }
 
 document.getElementById('force-btn').addEventListener('click', () => {
-  if (currentTabId) {
-    chrome.tabs.sendMessage(currentTabId, { type: 'toggleForce' }, (response) => {
-      if (response) {
-        updateStatus();
-      }
-    });
-  }
+  browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs[0]) {
+      browser.tabs.sendMessage(tabs[0].id, { type: 'toggleForce' }, (response) => {
+        if (response) {
+          updateStatus();
+        }
+      });
+    }
+  });
 });
 
 document.getElementById('dashboard-btn').addEventListener('click', () => {
-  chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
+  browser.tabs.create({ url: browser.runtime.getURL('dashboard.html') });
 });
 
 document.getElementById('dark-mode-btn').addEventListener('click', () => {
   darkModeEnabled = !darkModeEnabled;
-  chrome.storage.local.set({ darkModeEnabled });
+  browser.storage.local.set({ darkModeEnabled });
   updateDarkModeUI();
 });
 
 // Listen for dark mode changes from dashboard
-chrome.storage.onChanged.addListener((changes) => {
+browser.storage.onChanged.addListener((changes) => {
   if (changes.darkModeEnabled) {
     darkModeEnabled = changes.darkModeEnabled.newValue;
     updateDarkModeUI();
   }
 });
 
-chrome.storage.local.get(['darkModeEnabled'], (result) => {
+browser.storage.local.get(['darkModeEnabled'], (result) => {
   darkModeEnabled = result.darkModeEnabled === true;
   updateDarkModeUI();
   updateStats();
