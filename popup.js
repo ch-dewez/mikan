@@ -3,7 +3,7 @@ function formatTime(seconds) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
-  
+
   if (hours > 0) {
     return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   } else {
@@ -53,37 +53,37 @@ function updateStats() {
     const today = getLocalDateString();
     const weekStart = getWeekStart();
     const monthStart = getMonthStart();
-    
+
     let todaySeconds = 0;
     let weekSeconds = 0;
     let monthSeconds = 0;
     let totalSeconds = 0;
-    
+
     const sortedDays = Object.keys(watchData).sort().reverse();
-    
+
     for (const day of sortedDays) {
       const dayData = watchData[day];
       const seconds = dayData.totalSeconds || 0;
-      
+
       totalSeconds += seconds;
-      
+
       if (day === today) {
         todaySeconds = seconds;
       }
-      
+
       if (day >= weekStart) {
         weekSeconds += seconds;
       }
-      
+
       if (day >= monthStart) {
         monthSeconds += seconds;
       }
     }
-    
+
     document.getElementById('today-time').textContent = formatTime(todaySeconds);
     document.getElementById('week-time').textContent = formatTime(weekSeconds);
     document.getElementById('month-time').textContent = formatTime(monthSeconds);
-    
+
     browser.storage.local.set({ cachedTotalSeconds: totalSeconds });
   });
 }
@@ -95,7 +95,7 @@ function updateStatus() {
     const statusText = document.getElementById('status-text');
     const statusSubtext = document.getElementById('status-subtext');
     const forceBtn = document.getElementById('force-btn');
-    
+
     if (!tab || !tab.url) {
       statusCard.className = 'card status-card inactive';
       statusText.textContent = 'No tab detected';
@@ -103,35 +103,36 @@ function updateStatus() {
       forceBtn.style.display = 'none';
       return;
     }
-    
+
     browser.tabs.sendMessage(tab.id, { type: 'getStatus' }, (response) => {
-	  if (browser.runtime.lastError) {
-		statusCard.className = 'card status-card inactive';
-		statusText.textContent = 'Not on a supported page';
-		statusSubtext.textContent = '';
-		forceBtn.style.display = 'none';
-		return;
-	  }
-	  
-	  console.log('Mikan popup received:', response);
+      console.log("Mikan popup: get status response: ", response);
+      if (browser.runtime.lastError) {
+        statusCard.className = 'card status-card inactive';
+        statusText.textContent = 'Not on a supported page';
+        statusSubtext.textContent = '';
+        forceBtn.style.display = 'none';
+        return;
+      }
+
+      console.log('Mikan popup received:', response);
       if (!response) {
         statusCard.className = 'card status-card inactive';
         statusText.textContent = 'Extension not loaded';
         statusSubtext.textContent = 'Try refreshing the page';
         forceBtn.style.display = 'none';
-		
-		browser.runtime.sendMessage({ type: 'updateIcon', state: 'error', tabId: tab.id });
+
+        browser.runtime.sendMessage({ type: 'updateIcon', state: 'error', tabId: tab.id });
         return;
       }
-      
+
       forceBtn.style.display = 'block';
-      
+
       if (response.isTargetLanguage) {
-		  forceBtn.textContent = 'Mark as Non-Japanese';
-		} else {
-		  forceBtn.textContent = 'Mark as Japanese';
-		}
-      
+        forceBtn.textContent = 'Mark as Non-Japanese';
+      } else {
+        forceBtn.textContent = 'Mark as Japanese';
+      }
+
       if (response.hasError) {
         statusCard.className = 'card status-card wrong-lang';
         statusText.textContent = '⚠️ Auto detection failed';

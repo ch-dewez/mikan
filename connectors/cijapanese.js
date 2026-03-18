@@ -3,31 +3,27 @@
 (function() {
   function getVideoId() {
     // For cijapanese.com, we can use the ID from the track element as a unique video identifier
-    const trackElement = document.querySelector('video track[id^="CIJ_"]');
-    if (trackElement) {
-      console.log('Mikan Connector [cijapanese]: getVideoId - Found track ID:', trackElement.id);
-      return trackElement.id;
+    let url = window.location.href;
+    let index = url.indexOf("/video/");
+    index += "/video/".length;
+    let id = url.substring(index);
+
+    if (id == undefined) {
+      return "cijapanese"
     }
-    const sourceElement = document.querySelector('video source[src*="hls/main.m3u8"]');
-    if (sourceElement && sourceElement.src) {
-      const match = sourceElement.src.match(/\/hls\/([a-zA-Z0-9-]+)\/main\.m3u8/);
-      if (match && match[1]) {
-        console.log('Mikan Connector [cijapanese]: getVideoId - Found video ID from HLS source:', match[1]);
-        return match[1];
-      }
-    }
-    console.log('Mikan Connector [cijapanese]: getVideoId - No video ID found.');
-    return null;
+
+    return id;
   }
-  
+
   function isWatchPage() {
+    return window.location.href.includes("/video/");
     // cijapanese.com is primarily a video site, so most pages will be watch pages.
     // We can be a bit more specific if needed, but for now, assuming if a video element exists, it's a watch page.
-    const hasVideo = document.querySelector('video') !== null;
-    console.log('Mikan Connector [cijapanese]: isWatchPage - result:', hasVideo);
-    return hasVideo;
+    // const hasVideo = document.querySelector('video') !== null;
+    // console.log('Mikan Connector [cijapanese]: isWatchPage - result:', hasVideo);
+    // return hasVideo;
   }
-  
+
   function getCurrentTitle() {
     const titleElement = document.querySelector('media-title.vds-chapter-title');
     if (titleElement && titleElement.textContent) {
@@ -38,7 +34,7 @@
     console.log('Mikan Connector [cijapanese]: getCurrentTitle - Fallback to document title:', document.title);
     return document.title.replace(' - CI Japanese', '').trim();
   }
-  
+
   function findActiveVideo() {
     const videoEl = document.querySelector('video');
     if (videoEl) {
@@ -48,17 +44,12 @@
     }
     return videoEl;
   }
-  
+
   function getNavigationEvents() {
     // CI Japanese seems to be a SPA, so URL polling and popstate are relevant.
     // No specific custom navigation events like YouTube.
     console.log('Mikan Connector [cijapanese]: getNavigationEvents - returning [] (relying on polling/popstate)');
     return []; // content.js already handles polling and popstate
-  }
-  
-  // No API interception needed for CI Japanese based on initial analysis
-  function _injectAPIInterceptor() {
-    // No-op
   }
 
   // Function to monitor for the video element and signal when ready
@@ -102,18 +93,27 @@
       let requestHandled = true;
 
       console.log(`Mikan Connector [cijapanese]: Received request from content script: ${event.data.request}`);
-      switch(event.data.request) {
+      switch (event.data.request) {
+        case 'getTargetLanguage':
+          responseData = "ja";
+          break;
         case 'getVideoId':
           responseData = getVideoId();
           break;
         case 'isWatchPage':
           responseData = isWatchPage();
           break;
+        case 'isActive':
+          responseData = true; // if it's a watch page it's active
+          break;
         case 'getCurrentTitle':
           responseData = getCurrentTitle();
           break;
         case 'getNavigationEvents':
           responseData = getNavigationEvents();
+          break;
+        case 'isAdPlaying':
+          responseData = false;// I don't think there are any ads
           break;
         default:
           requestHandled = false;
