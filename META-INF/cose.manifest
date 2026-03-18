@@ -10,7 +10,7 @@ Digest-Algorithms: SHA1 SHA256
 SHA1-Digest: Svi7YdJJq9Q+Zsr9c6J17xCS80g=
 SHA256-Digest: Iv46meEZu85kSxR9NFDHrY5KF7VbB1RZHzwpZx0ExDc=
 
-Name: icon128.png
+Name: icons/icon128.png
 Digest-Algorithms: SHA1 SHA256
 SHA1-Digest: TWeKu2ZpdrHV0Q/zqzjdbaY3PE8=
 SHA256-Digest: /J/gK3afh0rcuYGM8qAJIIBOLHtjUHk56qBY/SqWweg=
@@ -65,12 +65,12 @@ Digest-Algorithms: SHA1 SHA256
 SHA1-Digest: oSamwF7Z+c5hC1QjYsTK5pcGiAU=
 SHA256-Digest: xZXr2iMRafTwuoHEnrwHZOeZfQLSd41i/dJaB1DSoQg=
 
-Name: icon48.png
+Name: icons/icon48.png
 Digest-Algorithms: SHA1 SHA256
 SHA1-Digest: DJlmJs4ScdL6njzHbAdNhJXYBeQ=
 SHA256-Digest: o/+wfu5u17xi045XgeMNWeM1JmNzWf2RG1A/ly72Irs=
 
-Name: icon16.png
+Name: icons/icon16.png
 Digest-Algorithms: SHA1 SHA256
 SHA1-Digest: m4hp1rxhtYGd25EYaRRH9ASWgWI=
 SHA256-Digest: 94scdhmUU2AExR3IMGx7dPx3+zKzrp3YA28svRkUGuc=
