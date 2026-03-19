@@ -1,4 +1,4 @@
-(function() {
+(async function() {
   let video = null;
   let lastTime = 0;
   let totalWatchedSeconds = 0;
@@ -9,12 +9,9 @@
   let currentVideoId = null;
   let lastSaveTime = 0;
   let hasError = false;
-  let connectorReady = false;
-  let videoElementReady = false; //TODO: is it really necessary, maybe remove this flag (that was added by ai)
-  let connectorHost = null;
 
-  let alwaysCheckConnectorLoaded = false; // Are the always Check Connector loaded
-
+  let connector = null;
+  //let connectorName = null;
 
   const TARGET_LANGUAGE = 'ja';
 
@@ -23,64 +20,19 @@
     'cijapanese.com': 'connectors/cijapanese.js',
   };
 
-  // thing like asbplayer -> if present then check
-  // TODO: Adding multiple always check connectors might break the messaging system
-  const alwaysCheckConnectors = [
-    'connectors/asbplayer.js'
-  ]
-
   const host = window.location.hostname.replace('www.', '');
-  const connectorPath = siteConnectors[host];
+  let connectorPath = siteConnectors[host];
+
+  if (!connectorPath) {
+    connectorPath = "connectors/any-website.js"
+  }
 
   console.log("Mikan: Connector path: ", connectorPath);
 
-  if (!connectorPath) {
-    alwaysCheckConnectorLoaded = true;
-    for (let i = 0; i < alwaysCheckConnectors.length; i++) {
-      injectScript(alwaysCheckConnectors[i]);
-    }
-  } else {
-    injectScript(connectorPath);
-  }
-
-  function injectScript(path) {
-    console.log("injecting " + path);
-    const s = document.createElement('script');
-    s.src = browser.runtime.getURL(path);
-    document.documentElement.appendChild(s);
-  }
-
-  // Promise-based message sending to the connector
-  function sendConnectorMessage(requestType, payload = {}) {
-    return new Promise((resolve) => {
-      const messageId = `mikan_req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const handler = (event) => {
-        if (event.data?.type === 'MIKAN_RESPONSE_DATA' && event.data.messageId === messageId) {
-          window.removeEventListener('message', handler);
-          resolve(event.data.data);
-        }
-      };
-      window.addEventListener('message', handler);
-      window.postMessage({ type: 'MIKAN_REQUEST_DATA', request: requestType, messageId, payload }, '*');
-    });
-  }
-
-  window.addEventListener('message', async (event) => {
-    if (event.data?.type === 'MIKAN_CONNECTOR_READY') {
-      console.log(`Mikan Content: Connector ready for ${event.data.host}`);
-      connectorReady = true;
-      connectorHost = event.data.host;
-      // init() will be called when videoElementReady is also true
-      checkAndInit();
-    }
-
-    if (event.data?.type === 'MIKAN_VIDEO_ELEMENT_READY') {
-      console.log('Mikan Content: Video element signaled as ready by connector.');
-      videoElementReady = true;
-      checkAndInit();
-    }
-  });
-
+  const moduleUrl = browser.runtime.getURL(connectorPath);
+  let module = await import(moduleUrl);
+  console.log("Mikan module", module);
+  connector = module.default();
 
   function getLocalDateString() {
     const now = new Date();
@@ -93,7 +45,7 @@
   function saveProgress(targetHostOverride = null) {
     if (totalWatchedSeconds < 1) return;
 
-    const activeHost = targetHostOverride || connectorHost;
+    const activeHost = targetHostOverride || connector.getName();
 
     const today = getLocalDateString();
     browser.storage.local.get(['watchData'], (result) => {
@@ -120,8 +72,8 @@
     });
   }
 
-  async function getCurrentTargetLanguage() {
-    let currentTargetLanguage = await sendConnectorMessage('getTargetLanguage');
+  function getCurrentTargetLanguage() {
+    let currentTargetLanguage = connector.getTargetLanguage();
     isTargetLanguage = (TARGET_LANGUAGE == currentTargetLanguage) || (currentTargetLanguage == "Custom");
     if (targetLanguageToggle) {
       isTargetLanguage = !isTargetLanguage;
@@ -129,7 +81,7 @@
     console.log("Is target language", isTargetLanguage);
   }
 
-  async function shouldTrack() {
+  function shouldTrack() {
     let shouldTrack = true;
 
     getCurrentTargetLanguage();
@@ -156,11 +108,10 @@
       // Only process/save every 1 second to keep performance high
       if (now - lastSaveTime >= 1000) {
 
-        if (isTargetLanguage && connectorHost) {
-          saveProgress(connectorHost);
+        if (isTargetLanguage) {
+          saveProgress();
         }
         else {
-          // idf if this is even reachable (
           totalWatchedSeconds = 0;
         }
         lastSaveTime = now;
@@ -169,17 +120,13 @@
     lastTime = currentTime;
   }
 
-  async function startTrackingIfPlaying() {
-    if (video && !video.paused && await shouldTrack()) {
+  function startTrackingIfPlaying() {
+    if (video && !video.paused && shouldTrack()) {
       lastTime = video.currentTime;
       lastSaveTime = Date.now();
       console.log('Mikan Content: Video already playing, starting to track');
     }
-  }
-
-  async function runDetection(retryCount = 0) {
     updateIconState();
-    startTrackingIfPlaying();
   }
 
   function updateIconState() {
@@ -197,7 +144,6 @@
     lastSaveTime = Date.now();
 
 
-    updateIconState();
     startTrackingIfPlaying();
 
     console.log('Mikan Content: Video playing, tracking:', shouldTrack());
@@ -255,18 +201,22 @@
     console.log('Mikan Content: Attached listeners to video, paused:', video.paused, 'currentTime:', video.currentTime);
   }
 
-  async function initializeTracker() {
+  async function initializeTracker(isWatchPageNbTry = 0) {
     // is watch page means that it can activate on this page
-    console.log('Mikan Content: initializeTracker called.');
-    const isWatchPage = await sendConnectorMessage('isWatchPage');
-    console.log('Mikan Content: isWatchPage:', isWatchPage);
+    const isWatchPage = connector.isWatchPage();
     if (!isWatchPage) {
       console.log('Mikan Content: initializeTracker: Not a watch page, skipping');
+      if (isWatchPageNbTry < 3) {
+        setTimeout(() => initializeTracker(isWatchPageNbTry += 1), 1000); // The page might not be loaded interely
+      } else if (isWatchPageNbTry < 6) {
+        setTimeout(() => initializeTracker(isWatchPageNbTry += 1), 5000);
+
+      }
       return;
     }
 
     // is active means that it is active right now
-    if (!await sendConnectorMessage("isActive")) {
+    if (!connector.isActive()) {
       console.log('Mikan, possibly an immersion page, but not yet active');
       setTimeout(initializeTracker, 1000); // retry in one second
       return;
@@ -274,18 +224,14 @@
 
     getCurrentTargetLanguage();// is also called later because maybe here it's too early
 
-    const newVideoId = await sendConnectorMessage('getVideoId');
+    const newVideoId = connector.getVideoId();
     console.log('Mikan Content: newVideoId from connector:', newVideoId);
-    if (!newVideoId) {
-      console.log('Mikan Content: initializeTracker: No video ID found');
-      return;
-    }
 
     if (newVideoId !== currentVideoId) {
       resetForNewVideo(newVideoId);
     }
 
-    const videoElement = document.querySelector('video'); // Now this should be reliable due to MIKAN_VIDEO_ELEMENT_READY
+    const videoElement = connector.getVideoElement();
 
     if (videoElement) {
       attachVideoListeners(videoElement);
@@ -303,43 +249,38 @@
   }
 
   async function checkAndInit() {
-    console.log(`Mikan Content: checkAndInit called. connectorReady: ${connectorReady}, videoElementReady: ${videoElementReady}`);
-    if (connectorReady && videoElementReady) {
-      console.log('Mikan Content: Both connector and video element are ready. Initializing tracker.');
-      await initializeTracker();
+    if (!connector) {
+      console.log('Mikan Content: Waiting for connector and/or video element. Status: Connector Ready:', connectorReady);
+    }
 
-      const navigationEvents = await sendConnectorMessage('getNavigationEvents');
-      console.log('Mikan Content: Attaching navigation event listeners:', navigationEvents);
-      for (const event of navigationEvents) {
-        window.addEventListener(event, () => {
-          console.log(`Mikan Content: Navigation event (${event}) detected.`);
-          // Reset flags to allow re-initialization on navigation
-          videoElementReady = false;
-          targetLanguageToggle = false;
-          setTimeout(checkAndInit, 100);
-        });
-      }
+    await initializeTracker();
 
-      window.addEventListener('popstate', () => {
-        console.log('Mikan Content: Popstate detected.');
-        videoElementReady = false;
+    const navigationEvents = connector.getNavigationEvents();
+    console.log('Mikan Content: Attaching navigation event listeners:', navigationEvents);
+    for (const event of navigationEvents) {
+      window.addEventListener(event, () => {
+        console.log(`Mikan Content: Navigation event (${event}) detected.`);
+        // Reset flags to allow re-initialization on navigation
         targetLanguageToggle = false;
         setTimeout(checkAndInit, 100);
       });
-
-      let lastUrl = location.href;
-      setInterval(() => {
-        if (location.href !== lastUrl) {
-          lastUrl = location.href;
-          console.log('Mikan Content: URL change detected via polling.');
-          videoElementReady = false;
-          targetLanguageToggle = false;
-          setTimeout(checkAndInit, 100);
-        }
-      }, 500);
-    } else {
-      console.log('Mikan Content: Waiting for connector and/or video element. Status: Connector Ready:', connectorReady, 'Video Element Ready:', videoElementReady);
     }
+
+    window.addEventListener('popstate', () => {
+      console.log('Mikan Content: Popstate detected.');
+      targetLanguageToggle = false;
+      setTimeout(checkAndInit, 100);
+    });
+
+    let lastUrl = location.href;
+    setInterval(() => {
+      if (location.href !== lastUrl) {
+        lastUrl = location.href;
+        console.log('Mikan Content: URL change detected via polling.');
+        targetLanguageToggle = false;
+        setTimeout(checkAndInit, 100);
+      }
+    }, 500);
   }
 
   if (document.readyState === 'loading') {
@@ -356,9 +297,7 @@
     if (message.type === 'getStatus') {
       sendResponse({
         isTargetLanguage,
-        currentVideoId,
         hasError,
-        host: connectorHost, // Include host for popup to make decisions
       });
 
     } else if (message.type === 'toggleForce') {

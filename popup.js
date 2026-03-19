@@ -189,5 +189,8 @@ browser.storage.local.get(['darkModeEnabled'], (result) => {
 
 setInterval(() => {
   updateStats();
-  updateStatus();
 }, 1000);
+
+setInterval(() => {
+  updateStatus();
+}, 3000);

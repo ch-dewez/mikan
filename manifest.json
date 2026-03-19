@@ -53,8 +53,10 @@
     {
       "resources": [
         "connectors/youtube.js",
+        "connectors/youtube-request-interceptor.js",
         "connectors/cijapanese.js",
-        "connectors/asbplayer.js" 
+        "connectors/any-website.js",
+        "connectors/connector.js" 
       ],
       "matches": [
         "<all_urls>"

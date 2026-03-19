@@ -9,7 +9,8 @@ This extension need to read the page to detect video element and/or the extensio
 ## Supported websites
 - [youtube](youtube.com)
 - [comprehensible japanese](cijapanese.com)
-- asbplayer: on every website, if asbplayer is loaded, this extension will search for a video element and based on that track time.
+- [asbplayer](https://github.com/killergerbah/asbplayer): on every website, if asbplayer is loaded, this extension will track time based on the video element.
+- any website: if there's a video element, AND that the user say that it's in the correct language, the extension will track time.
 - other coming soon(?)
 
 ## Work in Progress
