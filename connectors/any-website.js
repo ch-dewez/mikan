@@ -48,10 +48,6 @@ class AnyWebsiteConnector extends Connector {
     return videoElements[0];
   }
 
-  getVideoId() {
-    return window.location.href; // dummy video id
-  }
-
   isWatchPage() {
     return this.getVideoElement() != undefined;
   }

@@ -6,7 +6,6 @@
   let isTargetLanguage = false;
   let targetLanguageToggle = false;
 
-  let currentVideoId = null;
   let lastSaveTime = 0;
   let hasError = false;
 
@@ -53,18 +52,17 @@
       if (!watchData[today].websites) watchData[today].websites = {};
 
       if (!watchData[today].websites[activeHost]) {
-        watchData[today].websites[activeHost] = { totalSeconds: 0, videos: {} };
+        watchData[today].websites[activeHost] = { totalSeconds: 0 }
+      };
+
+      if (!watchData[today].websites[activeHost].totalSeconds) {
+        watchData[today].websites[activeHost].totalSeconds = 0;
       }
 
-      if (!watchData[today].websites[activeHost].videos[currentVideoId]) {
-        watchData[today].websites[activeHost].videos[currentVideoId] = 0;
-      }
-
-      watchData[today].websites[activeHost].videos[currentVideoId] += totalWatchedSeconds;
+      watchData[today].websites[activeHost].totalSeconds += totalWatchedSeconds;
 
       // Reset counter and recalculate totals
       totalWatchedSeconds = 0;
-      watchData[today].websites[activeHost].totalSeconds = Object.values(watchData[today].websites[activeHost].videos).reduce((a, b) => a + b, 0);
       watchData[today].totalSeconds = Object.values(watchData[today].websites).reduce((sum, site) => sum + site.totalSeconds, 0);
 
       browser.storage.local.set({ watchData });
@@ -150,12 +148,11 @@
     lastTime = video.currentTime;
   }
 
-  async function resetForNewVideo(newVideoId) {
-    if (currentVideoId && totalWatchedSeconds > 0) {
+  async function resetForNewVideo() {
+    if (totalWatchedSeconds > 0) {
       saveProgress();
     }
 
-    currentVideoId = newVideoId;
     totalWatchedSeconds = 0;
     lastTime = 0;
     lastSaveTime = 0;
@@ -207,11 +204,8 @@
 
     getCurrentTargetLanguage();// is also called later because maybe here it's too early
 
-    const newVideoId = connector.getVideoId();
 
-    if (newVideoId !== currentVideoId) {
-      resetForNewVideo(newVideoId);
-    }
+    resetForNewVideo();
 
     const videoElement = connector.getVideoElement();
 
@@ -247,20 +241,21 @@
       });
     }
 
-    window.addEventListener('popstate', () => {
+  }
+
+  window.addEventListener('popstate', () => {
+    targetLanguageToggle = false;
+    setTimeout(checkAndInit, 100);
+  });
+
+  let lastUrl = location.href;
+  setInterval(() => {
+    if (location.href !== lastUrl) {
+      lastUrl = location.href;
       targetLanguageToggle = false;
       setTimeout(checkAndInit, 100);
-    });
-
-    let lastUrl = location.href;
-    setInterval(() => {
-      if (location.href !== lastUrl) {
-        lastUrl = location.href;
-        targetLanguageToggle = false;
-        setTimeout(checkAndInit, 100);
-      }
-    }, 500);
-  }
+    }
+  }, 500);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', checkAndInit);

@@ -22,20 +22,6 @@ class CijConnector extends Connector {
     return v;
   }
 
-  getVideoId() {
-    // For cijapanese.com, we can use the ID from the track element as a unique video identifier
-    let url = window.location.href;
-    let index = url.indexOf("/video/");
-    index += "/video/".length;
-    let id = url.substring(index);
-
-    if (id == undefined) {
-      return "cijapanese"
-    }
-
-    return id;
-  }
-
   isWatchPage() {
     return window.location.href.includes("/video/");
   }

@@ -115,10 +115,6 @@ class YoutubeConnector extends Connector {
     return videoEl;
   }
 
-  getVideoId() {
-    return this.videoId || "youtube";
-  }
-
   isWatchPage() {
     const isWatch = window.location.pathname.includes('/watch') ||
       window.location.pathname.includes('/shorts/');

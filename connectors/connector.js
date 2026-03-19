@@ -13,10 +13,6 @@ export default class Connector {
 
   }
 
-  getVideoId() {
-
-  }
-
   isWatchPage() {
 
   }
