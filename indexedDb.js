@@ -1,3 +1,5 @@
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
 let db;
 const openOrCreateDB = indexedDB.open('MikanDB', 1)
 
@@ -28,12 +30,10 @@ openOrCreateDB.addEventListener('upgradeneeded', init => {
 });
 
 export function addTime(category, date, website, time) {
-  chrome.storage.local.get(["lastDate"]).then((lastDate) => {
-    if (date < lastDate) {
-      chrome.storage.local.set({ lastDate: date });
-    }
-  });
-
+  // fix of a bug, idk why it happens, TODO: maybe find the root of the bug?
+  if (typeof time != "number"){
+    return
+  }
   const transaction = db.transaction([category], 'readwrite');
   const objectStore = transaction.objectStore(category);
 

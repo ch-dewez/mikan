@@ -1,3 +1,5 @@
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
 (async function() {
   let isWatchPage = false;// here so that updateIcon can access it
   let isActive = false;
@@ -28,7 +30,7 @@
 
   console.log("Mikan: Connector path: ", connectorPath);
 
-  const moduleUrl = browser.runtime.getURL(connectorPath);
+  const moduleUrl = browserAPI.runtime.getURL(connectorPath);
   let module = await import(moduleUrl);
   connector = module.default();
 
@@ -37,7 +39,7 @@
 
     const today = new Date().toISOString().split("T")[0];
 
-    browser.runtime.sendMessage({
+    browserAPI.runtime.sendMessage({
       type: 'addTime',
       category: connector.getCategory(),
       date: today,
@@ -105,7 +107,7 @@
     }
 
     console.log(`Mikan Content: updateIconState: isTargetLanguage: ${isTargetLanguage}`);
-    browser.runtime.sendMessage({
+    browserAPI.runtime.sendMessage({
       type: 'updateIcon',
       state: state
     }).catch(e => console.error('Mikan Content: Error sending updateIcon message:', e));
@@ -226,7 +228,7 @@
 
   window.addEventListener('beforeunload', saveProgress);
 
-  browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'getStatus') {
       sendResponse({
         isWatchPage,

@@ -1,13 +1,15 @@
 import { addTime, getAllData, getDayTotal } from "./indexedDb.js";
 
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
 // Service worker - handles extension lifecycle
-browser.runtime.onInstalled.addListener(() => {
+browserAPI.runtime.onInstalled.addListener(() => {
   console.log('Mikan JP Tracker installed');
 
   // Initialize storage
-  browser.storage.local.get(['watchData'], (result) => {
+  browserAPI.storage.local.get(['watchData'], (result) => {
     if (!result.watchData) {
-      browser.storage.local.set({ watchData: {} });
+      browserAPI.storage.local.set({ watchData: {} });
     }
   });
 });
@@ -22,7 +24,7 @@ function updateIcon(tabId, state) {
     suffix = '-error';
   }
 
-  browser.action.setIcon({
+  browserAPI.action.setIcon({
     tabId: tabId,
     path: {
       "16": `icons/icon16${suffix}.png`,
@@ -32,7 +34,7 @@ function updateIcon(tabId, state) {
   });
 }
 
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'updateIcon') {
     if (sender.tab) {
       // Message from content script

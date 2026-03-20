@@ -2,7 +2,9 @@ let watchData = {};
 let darkModeEnabled = false;
 let websiteStats = [];
 
-const isExtension = typeof browser !== 'undefined' && browser.storage && browser.storage.local;
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
+const isExtension = typeof browserAPI !== 'undefined' && browserAPI.storage && browserAPI.storage.local;
 
 function formatTime(seconds) {
   seconds = Math.floor(seconds);
@@ -163,8 +165,6 @@ function buildHeatmap() {
 
   // Create new Cal-Heatmap instance
   calHeatmap = new CalHeatmap();
-  console.log(calHeatmap);
-  console.log(heatmapData);
 
   calHeatmap.paint({
     animationDuration: 0,
@@ -528,27 +528,25 @@ function renderWebsitePieChart() {
     });
 }
 
-console.log("dashboard");
 function init() {
-  console.log("init");
   // Set up dark mode toggle
   document.getElementById('dark-mode-btn').addEventListener('click', () => {
     darkModeEnabled = !darkModeEnabled;
     if (isExtension) {
-      browser.storage.local.set({ darkModeEnabled });
+      browserAPI.storage.local.set({ darkModeEnabled });
     }
     updateDarkModeUI();
   });
 
   if (isExtension) {
     // Load initial data including dark mode setting
-    browser.storage.local.get(['darkModeEnabled'], (result) => {
+    browserAPI.storage.local.get(['darkModeEnabled'], (result) => {
       darkModeEnabled = result.darkModeEnabled === true;
       updateDarkModeUI();
       //render();
     });
 
-    browser.runtime.sendMessage({ type: 'getAllData' })
+    browserAPI.runtime.sendMessage({ type: 'getAllData' })
       .then((data) => {
         console.log(data);
         watchData = data;
@@ -556,7 +554,7 @@ function init() {
       });
 
     // Listen for changes
-    browser.storage.onChanged.addListener((changes) => {
+    browserAPI.storage.onChanged.addListener((changes) => {
       // if (changes.watchData) {
       //   watchData = changes.watchData.newValue || {};
       //   render();
@@ -600,7 +598,6 @@ function calculateWebsiteStats() {
 }
 
 function render() {
-  console.log("render");
   calculateWebsiteStats();
   calculateStats();
   buildHeatmap();

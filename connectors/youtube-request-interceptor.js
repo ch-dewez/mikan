@@ -1,3 +1,4 @@
+console.log("Mikan: Youtube Request Interceptor Added")
 const originalFetch = window.fetch;
 window.fetch = async function(...args) {
   const url = args[0]?.url || args[0];
@@ -10,7 +11,6 @@ window.fetch = async function(...args) {
 
       clone.json().then(data => {
         if (data?.videoDetails?.videoId) {
-          console.log("Mikan: debug data interception ", data);
           window.postMessage({
             source: 'youtube-request-intercerptor', // Unique ID to filter your own messages
             url: args[0],

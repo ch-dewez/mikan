@@ -1,3 +1,5 @@
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
 function formatTime(seconds) {
   seconds = Math.floor(seconds);
   const hours = Math.floor(seconds / 3600);
@@ -46,7 +48,7 @@ async function updateStats() {
     currentDate.setDate(now.getDate() - i);
 
     let dateString = currentDate.toISOString().split('T')[0];
-    let result = await browser.runtime.sendMessage({ type: 'getDayTotal', date: dateString });
+    let result = await browserAPI.runtime.sendMessage({ type: 'getDayTotal', date: dateString });
 
     if (i == 0) {
       todaySeconds += result;
@@ -62,11 +64,11 @@ async function updateStats() {
   document.getElementById('week-time').textContent = formatTime(weekSeconds);
   document.getElementById('month-time').textContent = formatTime(monthSeconds);
 
-  //browser.storage.local.set({ cachedTotalSeconds: totalSeconds });
+  //browserAPI.storage.local.set({ cachedTotalSeconds: totalSeconds });
 }
 
 function updateStatus() {
-  browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  browserAPI.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const tab = tabs[0];
     const statusCard = document.getElementById('status-card');
     const statusText = document.getElementById('status-text');
@@ -81,9 +83,9 @@ function updateStatus() {
       return;
     }
 
-    browser.tabs.sendMessage(tab.id, { type: 'getStatus' }, (response) => {
+    browserAPI.tabs.sendMessage(tab.id, { type: 'getStatus' }, (response) => {
       console.log("Mikan popup: get status response: ", response);
-      if (browser.runtime.lastError) {
+      if (browserAPI.runtime.lastError) {
         statusCard.className = 'card status-card inactive';
         statusText.textContent = 'Not on a supported page';
         statusSubtext.textContent = '';
@@ -97,7 +99,7 @@ function updateStatus() {
         statusSubtext.textContent = 'Try refreshing the page';
         forceBtn.style.display = 'none';
 
-        browser.runtime.sendMessage({ type: 'updateIcon', state: 'error', tabId: tab.id });
+        browserAPI.runtime.sendMessage({ type: 'updateIcon', state: 'error', tabId: tab.id });
         return;
       }
 
@@ -140,9 +142,9 @@ function updateStatus() {
 }
 
 document.getElementById('force-btn').addEventListener('click', () => {
-  browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  browserAPI.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (tabs[0]) {
-      browser.tabs.sendMessage(tabs[0].id, { type: 'toggleForce' }, (response) => {
+      browserAPI.tabs.sendMessage(tabs[0].id, { type: 'toggleForce' }, (response) => {
         if (response) {
           updateStatus();
         }
@@ -152,24 +154,24 @@ document.getElementById('force-btn').addEventListener('click', () => {
 });
 
 document.getElementById('dashboard-btn').addEventListener('click', () => {
-  browser.tabs.create({ url: browser.runtime.getURL('dashboard.html') });
+  browserAPI.tabs.create({ url: browserAPI.runtime.getURL('dashboard.html') });
 });
 
 document.getElementById('dark-mode-btn').addEventListener('click', () => {
   darkModeEnabled = !darkModeEnabled;
-  browser.storage.local.set({ darkModeEnabled });
+  browserAPI.storage.local.set({ darkModeEnabled });
   updateDarkModeUI();
 });
 
 // Listen for dark mode changes from dashboard
-browser.storage.onChanged.addListener((changes) => {
+browserAPI.storage.onChanged.addListener((changes) => {
   if (changes.darkModeEnabled) {
     darkModeEnabled = changes.darkModeEnabled.newValue;
     updateDarkModeUI();
   }
 });
 
-browser.storage.local.get(['darkModeEnabled'], (result) => {
+browserAPI.storage.local.get(['darkModeEnabled'], (result) => {
   darkModeEnabled = result.darkModeEnabled === true;
   updateDarkModeUI();
   updateStats();

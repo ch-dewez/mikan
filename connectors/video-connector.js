@@ -46,9 +46,9 @@ export default class VideoConnector extends Connector {
       return;
     }
 
-    if (this.video && this.video !== videoElement) {
-      video.removeEventListener('timeupdate', this.handleTimeUpdate);
-      video.removeEventListener('seeked', this.handleSeeked);
+    if (this.video && typeof this.video != "undefined" && this.video !== videoElement) {
+      this.video.removeEventListener('timeupdate', this.handleTimeUpdate);
+      this.video.removeEventListener('seeked', this.handleSeeked);
       this.video = null;
       this.lastTime = 0;
       this.totalWatchedSeconds = 0;

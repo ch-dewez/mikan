@@ -1,5 +1,7 @@
 import VideoConnector from "./video-connector.js";
 
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
 // connectors/youtube.js
 class YoutubeConnector extends VideoConnector {
   constructor() {
@@ -17,7 +19,7 @@ class YoutubeConnector extends VideoConnector {
 
 
     const s = document.createElement('script');
-    s.src = browser.runtime.getURL("connectors/youtube-request-interceptor.js");
+    s.src = browserAPI.runtime.getURL("connectors/youtube-request-interceptor.js");
     document.documentElement.appendChild(s);
 
     window.addEventListener("message", (event) => {
