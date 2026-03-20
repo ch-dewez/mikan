@@ -28,4 +28,7 @@ export default class Connector {
   isAdPlaying() {
 
   }
+
+  getCategory() {
+  }
 }

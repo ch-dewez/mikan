@@ -39,6 +39,11 @@ class CijConnector extends Connector {
     return false;// can't detect
   }
 
+
+  getCategory() {
+    return "Watching"
+  }
+
 };
 
 export default function connectorFactory() {

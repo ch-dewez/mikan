@@ -36,41 +36,22 @@
   let module = await import(moduleUrl);
   connector = module.default();
 
-  function getLocalDateString() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
   function saveProgress(targetHostOverride = null) {
     if (totalWatchedSeconds < 1) return;
 
     const activeHost = targetHostOverride || connector.getName();
 
-    const today = getLocalDateString();
-    browser.storage.local.get(['watchData'], (result) => {
-      const watchData = result.watchData || {};
-      if (!watchData[today]) watchData[today] = { totalSeconds: 0, websites: {} };
-      if (!watchData[today].websites) watchData[today].websites = {};
+    const today = new Date().toISOString().split("T")[0];
 
-      if (!watchData[today].websites[activeHost]) {
-        watchData[today].websites[activeHost] = { totalSeconds: 0 }
-      };
+    browser.runtime.sendMessage({
+      type: 'addTime',
+      category: connector.getCategory(),
+      date: today,
+      website: activeHost,
+      time: totalWatchedSeconds
+    }).catch(e => console.error('Mikan Content: Error sending updateIcon message:', e));
 
-      if (!watchData[today].websites[activeHost].totalSeconds) {
-        watchData[today].websites[activeHost].totalSeconds = 0;
-      }
-
-      watchData[today].websites[activeHost].totalSeconds += totalWatchedSeconds;
-
-      // Reset counter and recalculate totals
-      totalWatchedSeconds = 0;
-      watchData[today].totalSeconds = Object.values(watchData[today].websites).reduce((sum, site) => sum + site.totalSeconds, 0);
-
-      browser.storage.local.set({ watchData });
-    });
+    totalWatchedSeconds = 0;
   }
 
   function getCurrentTargetLanguage() {

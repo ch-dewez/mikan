@@ -40,25 +40,6 @@ function formatTimeVerbose(seconds) {
   }
 }
 
-function getDateString(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function getWeekStart() {
-  const now = new Date();
-  const dayOfWeek = now.getDay();
-  const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-  return getDateString(new Date(now.getFullYear(), now.getMonth(), diff));
-}
-
-function getMonthStart() {
-  const now = new Date();
-  return getDateString(new Date(now.getFullYear(), now.getMonth(), 1));
-}
-
 function updateDarkModeUI() {
   const btn = document.getElementById('dark-mode-btn');
   if (darkModeEnabled) {
@@ -77,8 +58,27 @@ function updateDarkModeUI() {
   }
 }
 
+function getWeekStart() {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+  return new Date(now.getFullYear(), now.getMonth(), diff).toISOString().split("T")[0];
+}
+
+function getMonthStart() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+}
+
 function calculateStats() {
-  const today = getDateString(new Date());
+
+  const now = new Date();
+  let dayOfWeek = now.getDay();
+  // monday = 1
+  if (dayOfWeek == 0) {
+    dayOfWeek = 7;
+  }
+  const today = new Date().toISOString().split("T")[0];
   const weekStart = getWeekStart();
   const monthStart = getMonthStart();
 
@@ -87,21 +87,26 @@ function calculateStats() {
   let monthSeconds = 0;
   let totalSeconds = 0;
 
-  const days = Object.keys(watchData);
-  const daysWithData = days.filter(d => watchData[d] && watchData[d].totalSeconds > 0);
+  // const daysWithData = days.filter(d => watchData[d] && watchData[d].totalSeconds > 0);
+  const daysWithData = [];
 
-  for (const day of days) {
-    const seconds = watchData[day]?.totalSeconds || 0;
-    totalSeconds += seconds;
+  for (const categoryData of Object.values(watchData)) {
+    for (const day of categoryData) {
+      const seconds = day.total || 0;
+      if (seconds > 0) {
+        daysWithData.push(day.date);
+      }
+      totalSeconds += seconds;
 
-    if (day === today) {
-      todaySeconds = seconds;
-    }
-    if (day >= weekStart) {
-      weekSeconds += seconds;
-    }
-    if (day >= monthStart) {
-      monthSeconds += seconds;
+      if (day === today) {
+        todaySeconds = seconds;
+      }
+      if (day >= weekStart) {
+        weekSeconds += seconds;
+      }
+      if (day >= monthStart) {
+        monthSeconds += seconds;
+      }
     }
   }
 
@@ -127,12 +132,14 @@ function buildHeatmap() {
   // Convert watchData to Cal-Heatmap format
   const heatmapData = [];
 
-  for (const dateStr in watchData) {
-    if (watchData[dateStr].totalSeconds > 0) {
-      heatmapData.push({
-        date: dateStr,
-        value: watchData[dateStr].totalSeconds
-      });
+  for (const categoryData of Object.values(watchData)) {
+    for (const dayData of categoryData) {
+      if (dayData.total > 0) {
+        heatmapData.push({
+          date: dayData.date,
+          value: dayData.total
+        });
+      }
     }
   }
 
@@ -154,6 +161,8 @@ function buildHeatmap() {
 
   // Create new Cal-Heatmap instance
   calHeatmap = new CalHeatmap();
+  console.log(calHeatmap);
+  console.log(heatmapData);
 
   calHeatmap.paint({
     animationDuration: 0,
@@ -248,13 +257,21 @@ function buildWeeklyChart() {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
     days.push({
-      date: getDateString(date),
+      date: date.toISOString().split("T")[0],
       label: date.toLocaleDateString('en-US', { weekday: 'short' }),
       isToday: i === 0
     });
   }
 
-  const values = days.map(d => watchData[d.date]?.totalSeconds || 0);
+  const values = days.map(d => {
+    for (const dataCategory of Object.values(watchData)) {
+      for (const dayData of dataCategory) {
+        if (dayData.date == d.date) {
+          return dayData.total || 0;
+        }
+      }
+    }
+  });
   const maxValue = Math.max(...values, 60);
 
   for (let i = 0; i < days.length; i++) {
@@ -301,10 +318,12 @@ function buildMonthlyChart() {
     };
   }
 
-  for (const day in watchData) {
-    const monthKey = day.substring(0, 7);
-    if (monthlyTotals[monthKey]) {
-      monthlyTotals[monthKey].seconds += watchData[day].totalSeconds || 0;
+  for (const categoryData of Object.values(watchData)) {
+    for (const dayData of categoryData) {
+      const monthKey = dayData.date.substring(0, 7);
+      if (monthlyTotals[monthKey]) {
+        monthlyTotals[monthKey].seconds += dayData.total || 0;
+      }
     }
   }
 
@@ -465,7 +484,9 @@ function renderWebsitePieChart() {
     });
 }
 
+console.log("dashboard");
 function init() {
+  console.log("init");
   // Set up dark mode toggle
   document.getElementById('dark-mode-btn').addEventListener('click', () => {
     darkModeEnabled = !darkModeEnabled;
@@ -477,19 +498,25 @@ function init() {
 
   if (isExtension) {
     // Load initial data including dark mode setting
-    browser.storage.local.get(['watchData', 'darkModeEnabled'], (result) => {
-      watchData = result.watchData || {};
+    browser.storage.local.get(['darkModeEnabled'], (result) => {
       darkModeEnabled = result.darkModeEnabled === true;
       updateDarkModeUI();
-      render();
+      //render();
     });
+
+    browser.runtime.sendMessage({ type: 'getAllData' })
+      .then((data) => {
+        console.log(data);
+        watchData = data;
+        render();
+      });
 
     // Listen for changes
     browser.storage.onChanged.addListener((changes) => {
-      if (changes.watchData) {
-        watchData = changes.watchData.newValue || {};
-        render();
-      }
+      // if (changes.watchData) {
+      //   watchData = changes.watchData.newValue || {};
+      //   render();
+      // }
       if (changes.darkModeEnabled) {
         darkModeEnabled = changes.darkModeEnabled.newValue;
         updateDarkModeUI();
@@ -504,14 +531,15 @@ function init() {
 function calculateWebsiteStats() {
   const aggregatedWebsiteData = {};
 
-  for (const dateStr in watchData) {
-    const dayData = watchData[dateStr];
-    if (dayData && dayData.websites) {
-      for (const host in dayData.websites) {
-        if (!aggregatedWebsiteData[host]) {
-          aggregatedWebsiteData[host] = 0;
+  for (const dataCategory of Object.values(watchData)) {
+    for (const dayData of dataCategory) {
+      if (dayData && dayData.websites) {
+        for (const host in dayData.websites) {
+          if (!aggregatedWebsiteData[host]) {
+            aggregatedWebsiteData[host] = 0;
+          }
+          aggregatedWebsiteData[host] += dayData.websites[host];
         }
-        aggregatedWebsiteData[host] += dayData.websites[host].totalSeconds;
       }
     }
   }
@@ -522,12 +550,13 @@ function calculateWebsiteStats() {
 }
 
 function render() {
+  console.log("render");
   calculateWebsiteStats();
   calculateStats();
   buildHeatmap();
   buildWeeklyChart();
   buildMonthlyChart();
-  buildWebsiteList(); // Call the new function to build the website list
+  buildWebsiteList();
   renderWebsitePieChart();
 }
 

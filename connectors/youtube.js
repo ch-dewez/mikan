@@ -141,6 +141,10 @@ class YoutubeConnector extends Connector {
     return isAd;
   }
 
+
+  getCategory() {
+    return "Watching"
+  }
 };
 
 export default function connectorFactory() {

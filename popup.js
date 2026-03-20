@@ -11,26 +11,6 @@ function formatTime(seconds) {
   }
 }
 
-function getLocalDateString(date = new Date()) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function getWeekStart() {
-  const now = new Date();
-  const dayOfWeek = now.getDay();
-  const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-  const weekStart = new Date(now.getFullYear(), now.getMonth(), diff);
-  return getLocalDateString(weekStart);
-}
-
-function getMonthStart() {
-  const now = new Date();
-  return getLocalDateString(new Date(now.getFullYear(), now.getMonth(), 1));
-}
-
 let currentTabId = null;
 let darkModeEnabled = false;
 
@@ -47,45 +27,42 @@ function updateDarkModeUI() {
   }
 }
 
-function updateStats() {
-  browser.storage.local.get(['watchData'], (result) => {
-    const watchData = result.watchData || {};
-    const today = getLocalDateString();
-    const weekStart = getWeekStart();
-    const monthStart = getMonthStart();
+async function updateStats() {
+  let todaySeconds = 0;
+  let weekSeconds = 0;
+  let monthSeconds = 0;
+  //let totalSeconds = 0;
 
-    let todaySeconds = 0;
-    let weekSeconds = 0;
-    let monthSeconds = 0;
-    let totalSeconds = 0;
+  const now = new Date();
+  let dayOfWeek = now.getDay();
+  // monday = 1
+  if (dayOfWeek == 0) {
+    dayOfWeek = 7;
+  }
 
-    const sortedDays = Object.keys(watchData).sort().reverse();
+  // for one month
+  for (let i = 0; i < now.getDate(); i++) {
+    const currentDate = new Date(now);
+    currentDate.setDate(now.getDate() - i);
 
-    for (const day of sortedDays) {
-      const dayData = watchData[day];
-      const seconds = dayData.totalSeconds || 0;
+    let dateString = currentDate.toISOString().split('T')[0];
+    let result = await browser.runtime.sendMessage({ type: 'getDayTotal', date: dateString });
 
-      totalSeconds += seconds;
-
-      if (day === today) {
-        todaySeconds = seconds;
-      }
-
-      if (day >= weekStart) {
-        weekSeconds += seconds;
-      }
-
-      if (day >= monthStart) {
-        monthSeconds += seconds;
-      }
+    if (i == 0) {
+      todaySeconds += result;
     }
+    if (i < dayOfWeek) {
+      weekSeconds += result;
+    }
+    monthSeconds += result;
+    //totalSeconds += result;
+  }
 
-    document.getElementById('today-time').textContent = formatTime(todaySeconds);
-    document.getElementById('week-time').textContent = formatTime(weekSeconds);
-    document.getElementById('month-time').textContent = formatTime(monthSeconds);
+  document.getElementById('today-time').textContent = formatTime(todaySeconds);
+  document.getElementById('week-time').textContent = formatTime(weekSeconds);
+  document.getElementById('month-time').textContent = formatTime(monthSeconds);
 
-    browser.storage.local.set({ cachedTotalSeconds: totalSeconds });
-  });
+  //browser.storage.local.set({ cachedTotalSeconds: totalSeconds });
 }
 
 function updateStatus() {

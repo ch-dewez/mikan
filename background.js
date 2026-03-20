@@ -1,3 +1,5 @@
+import { addTime, getAllData, getDayTotal } from "./indexedDb.js";
+
 // Service worker - handles extension lifecycle
 browser.runtime.onInstalled.addListener(() => {
   console.log('Mikan JP Tracker installed');
@@ -39,5 +41,15 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // Message from popup with explicit tabId
       updateIcon(message.tabId, message.state);
     }
+  } else if (message.type === "addTime") {
+    addTime(message.category, message.date, message.website, message.time);
+  } else if (message.type === "getDayTotal") {
+    getDayTotal(message.date)
+      .then((total) => sendResponse(total));
+    return true;
+  } else if (message.type === "getAllData") {
+    getAllData()
+      .then((data) => sendResponse(data));
+    return true;
   }
 });
