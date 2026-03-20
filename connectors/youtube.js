@@ -1,6 +1,7 @@
+import VideoConnector from "./video-connector.js";
+
 // connectors/youtube.js
-import Connector from "./connector.js";
-class YoutubeConnector extends Connector {
+class YoutubeConnector extends VideoConnector {
   constructor() {
     super();
 
@@ -122,7 +123,12 @@ class YoutubeConnector extends Connector {
   }
 
   isActive() {
-    return true;
+    let video = this.getVideoElement();
+    if (video != undefined) {
+      this.attachVideoListeners(video);
+      return true;
+    }
+    return false;
   }
 
   getNavigationEvents() {

@@ -1,7 +1,7 @@
 // connectors/any-website.js
-import Connector from "./connector.js";
+import VideoConnector from "./video-connector.js";
 
-class AnyWebsiteConnector extends Connector {
+class AnyWebsiteConnector extends VideoConnector {
   constructor() {
     super();
   }
@@ -49,7 +49,12 @@ class AnyWebsiteConnector extends Connector {
   }
 
   isWatchPage() {
-    return this.getVideoElement() != undefined;
+    let video = this.getVideoElement();
+    if (video != undefined) {
+      this.attachVideoListeners(video);
+      return true;
+    }
+    return false;
   }
 
   isActive() {

@@ -9,10 +9,6 @@ export default class Connector {
 
   }
 
-  getVideoElement() {
-
-  }
-
   isWatchPage() {
 
   }
@@ -30,5 +26,11 @@ export default class Connector {
   }
 
   getCategory() {
+  }
+
+  getTimeSinceLastCall() {
+  }
+
+  resetTime() {
   }
 }

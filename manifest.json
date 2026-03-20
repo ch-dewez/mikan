@@ -50,11 +50,13 @@
   "web_accessible_resources": [
     {
       "resources": [
+        "connectors/connector.js",
+        "connectors/video-connector.js",
         "connectors/youtube.js",
         "connectors/youtube-request-interceptor.js",
         "connectors/cijapanese.js",
         "connectors/any-website.js",
-        "connectors/connector.js" 
+        "connectors/ttsu.js" 
       ],
       "matches": [
         "<all_urls>"

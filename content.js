@@ -1,8 +1,4 @@
 (async function() {
-  let video = null;
-  let lastTime = 0;
-  let totalWatchedSeconds = 0;
-
   let isWatchPage = false;// here so that updateIcon can access it
   let isActive = false;
   let shouldTrack = false;
@@ -10,7 +6,6 @@
   let isTargetLanguage = false;
   let targetLanguageToggle = false;
 
-  let lastSaveTime = 0;
   let hasError = false;
 
   let connector = null;
@@ -21,6 +16,7 @@
   const siteConnectors = {
     'youtube.com': 'connectors/youtube.js',
     'cijapanese.com': 'connectors/cijapanese.js',
+    'reader.ttsu.app': 'connectors/ttsu.js'
   };
 
   const host = window.location.hostname.replace('www.', '');
@@ -36,10 +32,8 @@
   let module = await import(moduleUrl);
   connector = module.default();
 
-  function saveProgress(targetHostOverride = null) {
-    if (totalWatchedSeconds < 1) return;
-
-    const activeHost = targetHostOverride || connector.getName();
+  function saveProgress(time) {
+    const activeHost = connector.getName();
 
     const today = new Date().toISOString().split("T")[0];
 
@@ -48,10 +42,8 @@
       category: connector.getCategory(),
       date: today,
       website: activeHost,
-      time: totalWatchedSeconds
+      time: time
     }).catch(e => console.error('Mikan Content: Error sending updateIcon message:', e));
-
-    totalWatchedSeconds = 0;
   }
 
   function getCurrentTargetLanguage() {
@@ -70,45 +62,34 @@
     shouldTrack = true;
 
     getCurrentTargetLanguage();
-    if (!isTargetLanguage) {
+    refreshIsActive();
+    refreshIsWatchPage();
+    if (!isTargetLanguage || !isWatchPage || !isActive) {
       shouldTrack = false;
     }
   }
 
-  async function handleTimeUpdate() {
-    //TODO: re-enable the detection of ad that are playing
-    //if (!video || video.paused || await sendConnectorMessage('isAdPlaying')) return;
-    if (!video || video.paused || !shouldTrack) return;
 
-    const currentTime = video.currentTime;
-    const delta = currentTime - lastTime;
-
-    if (delta > 0 && delta < 2) {
-      totalWatchedSeconds += delta;
-
-      const now = Date.now();
-      // Only process/save every 1 second to keep performance high
-      if (now - lastSaveTime >= 1000) {
-
-        if (shouldTrack) {
-          saveProgress();
-        }
-        else {
-          totalWatchedSeconds = 0;
-        }
-        lastSaveTime = now;
-      }
+  let trackingIntervalId = undefined;
+  function startTracking() {
+    connector.resetTime();
+    if (trackingIntervalId) {
+      clearInterval(trackingIntervalId);
     }
-    lastTime = currentTime;
-  }
+    trackingIntervalId = setInterval(
+      () => {
+        refreshShouldTrack();
+        if (!connector || !shouldTrack) {
+          console.log("MIKAN: stop tracking time");
+          connector.resetTime();
+          clearInterval(trackingIntervalId);
+        }
 
-  function startTrackingIfPlaying() {
-    refreshShouldTrack();
-    if (video && !video.paused && shouldTrack) {
-      lastTime = video.currentTime;
-      lastSaveTime = Date.now();
-    }
-    updateIconState();
+        let time = connector.getTimeSinceLastCall();
+        saveProgress(time);
+      },
+      500
+    );
   }
 
   function updateIconState() {
@@ -128,51 +109,6 @@
       type: 'updateIcon',
       state: state
     }).catch(e => console.error('Mikan Content: Error sending updateIcon message:', e));
-  }
-
-  function handlePlay() {
-    if (!video) return;
-    startTrackingIfPlaying();
-  }
-
-  function handlePause() {
-    saveProgress();
-  }
-
-  function handleSeeked() {
-    lastTime = video.currentTime;
-  }
-
-  async function resetForNewVideo() {
-    if (totalWatchedSeconds > 0) {
-      saveProgress();
-    }
-
-    totalWatchedSeconds = 0;
-    lastTime = 0;
-    lastSaveTime = 0;
-    isTargetLanguage = false;
-  }
-
-  function attachVideoListeners(videoElement) {
-    if (!videoElement) {
-      console.log('Mikan Content: attachVideoListeners: No video element provided.');
-      return;
-    }
-
-    if (video && video !== videoElement) {
-      video.removeEventListener('timeupdate', handleTimeUpdate);
-      video.removeEventListener('play', handlePlay);
-      video.removeEventListener('pause', handlePause);
-      video.removeEventListener('seeked', handleSeeked);
-    }
-
-    video = videoElement;
-
-    video.addEventListener('timeupdate', handleTimeUpdate);
-    video.addEventListener('play', handlePlay);
-    video.addEventListener('pause', handlePause);
-    video.addEventListener('seeked', handleSeeked);
   }
 
   function refreshIsActive() {
@@ -200,7 +136,6 @@
           console.log("MIKAN: refresh");
           clearInterval(watchStateIntervalId);
 
-          resetForNewVideo();
           updateIconState();
           checkAndInit();
         }
@@ -243,27 +178,16 @@
       return;
     }
 
-    resetForNewVideo();
 
-    const videoElement = connector.getVideoElement();
+    updateIconState();
+    startTracking();
 
-    if (videoElement) {
-      attachVideoListeners(videoElement);
-      lastTime = video.currentTime;
-
-      updateIconState();
-      startTrackingIfPlaying();
-
-      console.log('Mikan Content: Tracker initialized successfully.');
-    } else {
-      console.log('Mikan Content: No video element found, will retry initialization.');
-      setTimeout(initializeTracker, 200); // Retry if video element not found yet
-    }
+    console.log('Mikan Content: Tracker initialized successfully.');
   }
 
   async function checkAndInit() {
     if (!connector) {
-      console.log('Mikan Content: Waiting for connector and/or video element. Status: Connector Ready:', connectorReady);
+      console.log('Mikan Content: Waiting for connector. Status: Connector Ready:', connectorReady);
     }
 
     await initializeTracker();

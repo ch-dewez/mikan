@@ -1,6 +1,7 @@
+import VideoConnector from "./video-connector.js";
+
 // connectors/cijapanese.js
-import Connector from "./connector.js";
-class CijConnector extends Connector {
+class CijConnector extends VideoConnector {
   constructor() {
     super();
   }
@@ -27,8 +28,12 @@ class CijConnector extends Connector {
   }
 
   isActive() {
-    const videoEl = document.querySelector('video');
-    return videoEl != undefined;
+    let video = this.getVideoElement();
+    if (video != undefined) {
+      this.attachVideoListeners(video);
+      return true;
+    }
+    return false;
   }
 
   getNavigationEvents() {
@@ -37,11 +42,6 @@ class CijConnector extends Connector {
 
   isAdPlaying() {
     return false;// can't detect
-  }
-
-
-  getCategory() {
-    return "Watching"
   }
 
 };

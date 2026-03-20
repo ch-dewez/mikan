@@ -94,17 +94,19 @@ function calculateStats() {
     for (const day of categoryData) {
       const seconds = day.total || 0;
       if (seconds > 0) {
-        daysWithData.push(day.date);
+        if (!daysWithData.includes(day.date)) {
+          daysWithData.push(day.date);
+        }
       }
       totalSeconds += seconds;
 
-      if (day === today) {
-        todaySeconds = seconds;
+      if (day.date === today) {
+        todaySeconds += seconds;
       }
-      if (day >= weekStart) {
+      if (day.date >= weekStart) {
         weekSeconds += seconds;
       }
-      if (day >= monthStart) {
+      if (day.date >= monthStart) {
         monthSeconds += seconds;
       }
     }
@@ -396,7 +398,7 @@ function buildMonthlyChart() {
     valueSpan.className = 'monthly-value';
     valueSpan.textContent = formatTimeHours(data.total);
     monthlyBar.appendChild(valueSpan);
-    
+
     container.appendChild(row);
   }
 }
