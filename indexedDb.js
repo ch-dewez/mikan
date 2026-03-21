@@ -31,8 +31,11 @@ openOrCreateDB.addEventListener('upgradeneeded', init => {
 
 export function addTime(category, date, website, time) {
   // fix of a bug, idk why it happens, TODO: maybe find the root of the bug?
-  if (typeof time != "number"){
+  if (typeof time != "number") {
     return
+  }
+  if (website == "") {
+    website = "Manual"
   }
   const transaction = db.transaction([category], 'readwrite');
   const objectStore = transaction.objectStore(category);

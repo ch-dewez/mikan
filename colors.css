@@ -1,0 +1,90 @@
+:root {
+    /* Brand & Accent Colors */
+    --brand-primary: #ea580c;
+    --brand-secondary: #9a3412;
+    --brand-tertiary: #c2410c;
+
+    /* Activity Type Colors */
+    --activity-reading: #3498db;
+    --activity-watching: #e74c3c;
+    --activity-speaking: #2ecc71;
+
+    /* --- Light Theme --- */
+    --bg-gradient: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    --bg-primary: #ffffff;
+    --bg-secondary: #fef3e2;
+    /* For bar containers, heatmap L0 */
+    --bg-tertiary: #f5f5f4;
+    /* For future dates, button hovers */
+
+    --text-primary: #451a03;
+    /* Deepest brown for high emphasis */
+    --text-secondary: #9a3412;
+    /* For labels and secondary text */
+    --text-on-accent: #ffffff;
+
+    --link-color: #ea580c;
+    --link-alt-color: #fb923c;
+
+    --border-primary: #e7e5e4;
+    --border-secondary: #fed7aa;
+    /* For footers, empty bars */
+
+    --shadow-color: rgba(234, 88, 12, 0.08);
+    --shadow-hover-color: rgba(234, 88, 12, 0.12);
+
+    /* --- Dark Theme --- */
+    --dark-bg-gradient: linear-gradient(135deg, #1c1917 0%, #292524 100%);
+    --dark-bg-primary: #292524;
+    --dark-bg-secondary: #44403c;
+    /* For bar containers, borders */
+    --dark-bg-tertiary: #1c1917;
+
+    --dark-text-primary: #fafaf9;
+    --dark-text-secondary: #a8a29e;
+    --dark-accent-text: #fb923c;
+    --dark-accent-text-secondary: #fdba74;
+
+    --dark-border-primary: #57534e;
+    --dark-border-secondary: #44403c;
+
+    --dark-shadow-color: rgba(0, 0, 0, 0.3);
+    --dark-shadow-hover-color: rgba(0, 0, 0, 0.4);
+
+    /* --- Heatmap Scale (used in both themes) --- */
+    --heatmap-level-0: #fef3e2;
+    --heatmap-level-1: #fed7aa;
+    --heatmap-level-2: #fdba74;
+    --heatmap-level-3: #fb923c;
+    --heatmap-level-4: #f97316;
+    --heatmap-level-5: #ea580c;
+    --heatmap-level-6: #c2410c;
+
+    /* --- Misc --- */
+    --tooltip-bg: #1c1917;
+    --tooltip-text: #ffffff;
+    --value-text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+
+    --current-bg-gradient: var(--bg-gradient);
+    --current-bg-card: var(--bg-primary);
+    --current-bg-secondary: var(--bg-secondary);
+    --current-bg-tertiary: var(--bg-tertiary);
+    --current-text-main: var(--text-primary);
+    --current-text-sub: var(--text-secondary);
+    --current-border: var(--border-primary);
+    --current-border-secondary: var(--border-secondary);
+    --current-shadow: var(--shadow-color);
+}
+
+/* Dark Mode Variable Swaps */
+body.dark-mode {
+    --current-bg-gradient: var(--dark-bg-gradient);
+    --current-bg-card: var(--dark-bg-primary);
+    --current-bg-secondary: var(--dark-bg-secondary);
+    --current-bg-tertiary: var(--dark-bg-tertiary);
+    --current-text-main: var(--dark-text-primary);
+    --current-text-sub: var(--dark-text-secondary);
+    --current-border: var(--dark-border-primary);
+    --current-border-secondary: var(--dark-border-secondary);
+    --current-shadow: var(--dark-shadow-color);
+}

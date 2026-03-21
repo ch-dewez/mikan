@@ -217,6 +217,19 @@ function buildHeatmap() {
       }
     ]
   ]);
+
+  calHeatmap.on('click', (event, timestamp, value) => {
+    if (!timestamp || !value) {
+      return;
+    }
+    let section = document.getElementById("selected-day-section");
+    section.style.display = "block";
+
+    let container = document.getElementById("selected-day-list");
+
+    let date = new Date(timestamp).toISOString().split("T")[0];
+    buildWebsiteList(container, date)
+  });
 }
 
 function showTooltip(e) {
@@ -362,15 +375,15 @@ function buildMonthlyChart() {
 
   for (const [key, data] of months) {
     const row = document.createElement('div');
-    row.className = 'monthly-row';
+    row.className = 'chart-row';
 
     const label = document.createElement('div');
-    label.className = 'monthly-label';
+    label.className = 'bar-label';
     label.textContent = data.label;
     row.appendChild(label);
 
     const barContainer = document.createElement('div');
-    barContainer.className = 'monthly-bar-container';
+    barContainer.className = 'horizontal-bar-container';
     row.appendChild(barContainer);
 
     const monthlyBar = document.createElement('div');
@@ -403,8 +416,13 @@ function buildMonthlyChart() {
   }
 }
 
-function buildWebsiteList() {
-  const container = document.getElementById('website-list');
+function buildWebsiteList(container = undefined, date = "") {
+  calculateWebsiteStats(date);
+
+  if (!container || container == undefined) {
+    container = document.getElementById('website-list');
+  }
+
   if (!container) return;
 
   container.innerHTML = '';
@@ -418,16 +436,16 @@ function buildWebsiteList() {
 
   websiteStats.forEach(website => {
     const websiteItem = document.createElement('div');
-    websiteItem.className = 'website-item';
+    websiteItem.className = 'chart-row';
 
     const websiteLabel = document.createElement('div');
-    websiteLabel.className = 'website-label';
+    websiteLabel.className = 'bar-label';
     websiteLabel.title = website.host;
     websiteLabel.textContent = website.host;
     websiteItem.appendChild(websiteLabel);
 
     const websiteBarContainer = document.createElement('div');
-    websiteBarContainer.className = 'website-bar-container';
+    websiteBarContainer.className = 'horizontal-bar-container';
 
     const websiteBar = document.createElement('div');
     websiteBar.className = 'website-bar';
@@ -465,6 +483,23 @@ function renderWebsitePieChart() {
 
   container.innerHTML = '';
 
+  const pieChartData = [];
+  websiteStats.forEach(site => {
+    if (site.Reading > 0) {
+      pieChartData.push({ host: site.host, category: 'Reading', seconds: site.Reading });
+    }
+    if (site.Watching > 0) {
+      pieChartData.push({ host: site.host, category: 'Watching', seconds: site.Watching });
+    }
+    if (site.Speaking > 0) {
+      pieChartData.push({ host: site.host, category: 'Speaking', seconds: site.Speaking });
+    }
+  });
+
+  if (pieChartData.length === 0) {
+    return;
+  }
+
   const width = container.offsetWidth || 300;
   const height = 320;
   const outerRadius = Math.min(width, height) / 2 - 50;
@@ -477,12 +512,8 @@ function renderWebsitePieChart() {
     .append("g")
     .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
-  const color = d3.scaleOrdinal()
-    .domain(websiteStats.map(d => d.host))
-    .range(["#ea580c", "#f97316", "#fb923c", "#fdba74", "#fed7aa", "#ffedd5"]);
-
   const pie = d3.pie()
-    .value(d => d.totalSeconds)
+    .value(d => d.seconds)
     .sort(null);
 
   const arc = d3.arc()
@@ -494,7 +525,7 @@ function renderWebsitePieChart() {
     .innerRadius(outerRadius * 0.85)
     .outerRadius(outerRadius * 0.85);
 
-  const pieData = pie(websiteStats);
+  const pieData = pie(pieChartData);
 
   // Draw Slices
   svg.selectAll("path")
@@ -502,7 +533,7 @@ function renderWebsitePieChart() {
     .enter()
     .append("path")
     .attr("d", arc)
-    .attr("fill", d => color(d.data.host))
+    .attr("class", d => `pie-slice ${d.data.category}`)
     .attr("stroke", "white")
     .style("stroke-width", "1px");
 
@@ -524,7 +555,7 @@ function renderWebsitePieChart() {
     })
     .text(d => {
       const percentage = (d.endAngle - d.startAngle) / (2 * Math.PI);
-      return percentage > 0.05 ? d.data.host : ''; // Only show if > 5%
+      return percentage > 0.05 ? d.data.host : ''; // Label content is host name
     });
 }
 
@@ -570,12 +601,15 @@ function init() {
   }
 }
 
-function calculateWebsiteStats() {
+function calculateWebsiteStats(date = "") {
   const aggregatedWebsiteData = {};
 
   for (const [category, categoryData] of Object.entries(watchData)) {
     for (const dayData of categoryData) {
       if (dayData && dayData.websites) {
+        if (date != "" && dayData.date != date) {
+          continue;
+        }
         for (const host in dayData.websites) {
           if (!aggregatedWebsiteData[host]) {
             aggregatedWebsiteData[host] = {
@@ -598,7 +632,6 @@ function calculateWebsiteStats() {
 }
 
 function render() {
-  calculateWebsiteStats();
   calculateStats();
   buildHeatmap();
   buildWeeklyChart();

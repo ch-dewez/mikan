@@ -5,6 +5,9 @@
   <meta charset="UTF-8">
   <title>Mikan Dashboard</title>
   <style>
+
+    @import "colors.css";
+
     * {
       margin: 0;
       padding: 0;
@@ -13,16 +16,10 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      background: var(--current-bg-gradient);
       min-height: 100vh;
       padding: 40px 20px;
       transition: background 0.3s, color 0.3s;
-    }
-
-    /* Dark mode styles */
-    body.dark-mode {
-      background: linear-gradient(135deg, #1c1917 0%, #292524 100%);
-      color: #fafaf9;
     }
 
     .container {
@@ -36,13 +33,9 @@
       position: relative;
     }
 
-    body.dark-mode .header h1 {
-      color: #fb923c;
-    }
-
     .header h1 {
       font-size: 42px;
-      color: #ea580c;
+      color: var(--brand-primary);
       margin-bottom: 8px;
     }
 
@@ -52,42 +45,31 @@
     }
 
     .header p {
-      color: #9a3412;
+      color: var(--current-text-sub);
       font-size: 16px;
-    }
-
-    body.dark-mode .header p {
-      color: #fdba74;
     }
 
     .dark-mode-toggle {
       position: absolute;
       top: 0;
       right: 0;
-      background: white;
-      border: 1px solid #e7e5e4;
+      background: var(--current-bg-card);
+      border: 1px solid var(--current-border);
       border-radius: 10px;
       padding: 10px 16px;
       font-size: 18px;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 2px 8px rgba(234, 88, 12, 0.08);
+      box-shadow: 0 2px 8px var(--current-shadow);
     }
 
     .dark-mode-toggle:hover {
-      background: #f5f5f4;
+      background: var(--current-bg-tertiary);
       transform: translateY(-1px);
     }
 
-    body.dark-mode .dark-mode-toggle {
-      background: #44403c;
-      border-color: #57534e;
-      color: #fafaf9;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-
     body.dark-mode .dark-mode-toggle:hover {
-      background: #57534e;
+      background: var(--current-border);
     }
 
     .stats-grid {
@@ -116,75 +98,54 @@
     }
 
     .stat-card {
-      background: white;
+      background: var(--current-bg-card);
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 4px 20px rgba(234, 88, 12, 0.08);
+      box-shadow: 0 4px 20px var(--current-shadow);
       text-align: center;
       transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
     }
 
     .stat-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(234, 88, 12, 0.12);
-    }
-
-    body.dark-mode .stat-card {
-      background: #292524;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    body.dark-mode .stat-card:hover {
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 8px 30px var(--shadow-hover-color);
     }
 
     .stat-value {
       font-size: 32px;
       font-weight: 700;
-      color: #ea580c;
+      color: var(--brand-primary);
       margin-bottom: 4px;
     }
 
     .stat-label {
       font-size: 13px;
-      color: #9a3412;
+      color: var(--current-text-sub);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     body.dark-mode .stat-label {
-      color: #fdba74;
+      color: var(--dark-accent-text-secondary);
     }
 
     /* Container Styles for the new sections */
-    .website-list-section,
     .website-pie-section {
-      background: white;
+      background: var(--current-bg-card);
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 4px 20px rgba(234, 88, 12, 0.08);
+      box-shadow: 0 4px 20px var(--current-shadow);
       transition: background 0.3s, box-shadow 0.3s;
       display: flex;
       flex-direction: column;
-    }
-
-    body.dark-mode .website-list-section,
-    body.dark-mode .website-pie-section {
-      background: #292524;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
     .website-list-section-title,
     .website-pie-section-title {
       font-size: 15px;
       font-weight: 600;
-      color: #c2410c;
+      color: var(--brand-tertiary);
       margin-bottom: 20px;
-    }
-
-    body.dark-mode .website-list-section-title,
-    body.dark-mode .website-pie-section-title {
-      color: #fb923c;
     }
 
     /* Pie Chart Specifics */
@@ -200,11 +161,11 @@
     .pie-label {
       font-size: 11px;
       font-weight: 700;
-      fill: #451a03;
+      fill: var(--current-text-main);
       /* Deep brown-orange */
 
       /* The Secret Sauce: Text Halo */
-      stroke: #ffffff;
+      stroke: var(--current-bg-card);
       stroke-width: 3px;
       stroke-linejoin: round;
       paint-order: stroke;
@@ -213,19 +174,24 @@
       transition: fill 0.3s;
     }
 
-    body.dark-mode .pie-label {
-      fill: #ffffff;
-      stroke: #1c1917;
-      /* Dark background color for the halo */
-    }
-
-    /* Optional: Subtle animation to make the pie feel alive */
     .pie-slice {
       transition: transform 0.2s ease;
     }
 
     .pie-slice:hover {
       transform: scale(1.03);
+    }
+
+    .pie-slice.Reading {
+      fill: var(--activity-reading);
+    }
+
+    .pie-slice.Watching {
+      fill: var(--activity-watching);
+    }
+
+    .pie-slice.Speaking {
+      fill: var(--activity-speaking);
     }
 
     .heatmap-container {
@@ -248,7 +214,7 @@
       width: 14px;
       height: 14px;
       border-radius: 3px;
-      background: #fed7aa;
+      background: var(--current-border-secondary);
       cursor: pointer;
       transition: transform 0.1s;
     }
@@ -258,35 +224,35 @@
     }
 
     .heatmap-day.level-0 {
-      background: #fef3e2;
+      background: var(--heatmap-level-0);
     }
 
     .heatmap-day.level-1 {
-      background: #fed7aa;
+      background: var(--heatmap-level-1);
     }
 
     .heatmap-day.level-2 {
-      background: #fdba74;
+      background: var(--heatmap-level-2);
     }
 
     .heatmap-day.level-3 {
-      background: #fb923c;
+      background: var(--heatmap-level-3);
     }
 
     .heatmap-day.level-4 {
-      background: #f97316;
+      background: var(--heatmap-level-4);
     }
 
     .heatmap-day.level-5 {
-      background: #ea580c;
+      background: var(--heatmap-level-5);
     }
 
     .heatmap-day.level-6 {
-      background: #c2410c;
+      background: var(--heatmap-level-6);
     }
 
     .heatmap-day.future {
-      background: #f5f5f4;
+      background: var(--current-bg-tertiary);
       cursor: default;
     }
 
@@ -294,16 +260,8 @@
       transform: none;
     }
 
-    body.dark-mode .heatmap-day.level-0 {
-      background: #44403c;
-    }
-
-    body.dark-mode .heatmap-day.future {
-      background: #1c1917;
-    }
-
     body.dark-mode .ch-subdomain-bg {
-      fill: #44403C;
+      fill: var(--dark-bg-secondary);
     }
 
     .heatmap-labels {
@@ -311,12 +269,8 @@
       justify-content: space-between;
       margin-top: 8px;
       font-size: 11px;
-      color: #9a3412;
+      color: var(--current-text-sub);
       padding: 0 2px;
-    }
-
-    body.dark-mode .heatmap-labels {
-      color: #a8a29e;
     }
 
     .heatmap-legend {
@@ -326,11 +280,7 @@
       margin-top: 16px;
       justify-content: flex-end;
       font-size: 11px;
-      color: #9a3412;
-    }
-
-    body.dark-mode .heatmap-legend {
-      color: #a8a29e;
+      color: var(--current-text-sub);
     }
 
     .heatmap-legend-colors {
@@ -338,7 +288,8 @@
       gap: 3px;
     }
 
-    .heatmap-legend-color {
+    .heatmap-legend-color,
+    .immersion-legend-box {
       width: 14px;
       height: 14px;
       border-radius: 3px;
@@ -346,15 +297,15 @@
 
     .tooltip {
       position: fixed;
-      background: #1c1917;
-      color: white;
+      background: var(--tooltip-bg);
+      color: var(--tooltip-text);
       padding: 8px 12px;
       border-radius: 8px;
       font-size: 12px;
       pointer-events: none;
       z-index: 1000;
       display: none;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 12px var(--current-shadow-color);
     }
 
     .tooltip-date {
@@ -380,27 +331,26 @@
     }
 
     .chart-container {
-      background: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      background: var(--current-bg-card);
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 4px 20px rgba(234, 88, 12, 0.08);
+      box-shadow: 0 4px 20px var(--current-shadow);
       transition: background 0.3s, box-shadow 0.3s;
-    }
-
-    body.dark-mode .chart-container {
-      background: #292524;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
     .chart-title {
       font-size: 15px;
       font-weight: 600;
-      color: #c2410c;
+      color: var(--brand-tertiary);
       margin-bottom: 16px;
     }
 
     body.dark-mode .chart-title {
-      color: #fb923c;
+      color: var(--dark-accent-text);
     }
 
     .bar-chart {
@@ -434,11 +384,7 @@
     }
 
     .bar.empty {
-      background: #fed7aa;
-    }
-
-    body.dark-mode .bar.empty {
-      background: #44403c;
+      background: var(--current-bg-secondary);
     }
 
     .bar:hover {
@@ -448,43 +394,30 @@
     .bar-value {
       font-size: 10px;
       font-weight: 600;
-      color: #ea580c;
+      color: var(--brand-primary);
       margin-bottom: 4px;
       text-align: center;
     }
 
     .bar-label {
       font-size: 11px;
-      color: #9a3412;
+      color: var(--current-text-sub);
       margin-top: 8px;
       text-align: center;
+      width: 50px;
     }
 
-    body.dark-mode .bar-label {
-      color: #a8a29e;
-    }
 
-    .monthly-chart {
+    .horizontal-bar-chart {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
 
-    .monthly-row {
+    .chart-row {
       display: flex;
       align-items: center;
       gap: 12px;
-    }
-
-    .monthly-label {
-      font-size: 12px;
-      color: #9a3412;
-      width: 36px;
-      flex-shrink: 0;
-    }
-
-    body.dark-mode .monthly-label {
-      color: #a8a29e;
     }
 
     .bar-segment {
@@ -498,17 +431,17 @@
 
     .bar-segment.Reading,
     .reading-legend-color {
-      background-color: #3498db;
+      background-color: var(--activity-reading);
     }
 
     .bar-segment.Watching,
     .watching-legend-color {
-      background-color: #e74c3c;
+      background-color: var(--activity-watching);
     }
 
     .bar-segment.Speaking,
     .speaking-legend-color {
-      background-color: #2ecc71;
+      background-color: var(--activity-speaking);
     }
 
 
@@ -518,12 +451,12 @@
       gap: 8px;
       margin-top: 16px;
       font-size: 11px;
-      color: #9a3412;
+      color: var(--current-text-sub);
     }
 
     .category-legend-container {
       display: flex;
-      color: #fdba74;
+      color: var(--current-text-sub);
       font-size: 12px;
     }
 
@@ -535,39 +468,63 @@
 
     }
 
-    body.dark-mode .monthly-bar-container {
-      background: #44403c;
+    .horizontal-bar-container {
+      flex: 1;
+      height: 24px;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      overflow: hidden;
+      transition: background 0.3s;
+      position: relative;
+      display: flex;
     }
 
+    body.dark-mode .horizontal-bar-container {
+      background: var(--dark-bg-secondary);
+    }
+
+    .website-bar,
     .monthly-bar {
       height: 100%;
       border-radius: 6px;
-      transition: width 0.5s ease-out;
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      /* Changed to flex-start */
-      /* Removed padding-right: 8px */
     }
 
+    .website-bar {
+      min-width: fit-content;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .monthly-bar {
+      transition: width 0.5s ease-out;
+    }
+
+    .website-bar.empty,
     .monthly-bar.empty {
-      background: #fed7aa;
+      background: var(--current-border-secondary);
     }
 
+    body.dark-mode .website-bar.empty,
     body.dark-mode .monthly-bar.empty {
-      background: #44403c;
+      background: var(--dark-bg-secondary);
     }
 
     .website-value,
     .monthly-value {
       font-size: 11px;
       font-weight: 600;
-      color: white;
+      color: var(--text-on-accent);
       white-space: nowrap;
       flex-shrink: 0;
       /* Prevent from shrinking */
       padding: 0 8px;
       /* Added padding here */
+      text-shadow: var(--value-text-shadow);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     /* Removed .monthly-value.outside */
@@ -576,19 +533,14 @@
       text-align: center;
       margin-top: 40px;
       padding-top: 24px;
-      border-top: 1px solid #fed7aa;
-      color: #9a3412;
+      border-top: 1px solid var(--current-border-secondary);
+      color: var(--current-text-sub);
       font-size: 13px;
       transition: border-color 0.3s, color 0.3s;
     }
 
-    body.dark-mode .footer {
-      border-top-color: #44403c;
-      color: #a8a29e;
-    }
-
     .footer a {
-      color: #ea580c;
+      color: var(--link-color);
       text-decoration: none;
       font-weight: 600;
     }
@@ -609,11 +561,7 @@
     }
 
     .footer-separator {
-      color: #fed7aa;
-    }
-
-    body.dark-mode .footer-separator {
-      color: #57534e;
+      color: var(--current-border-secondary);
     }
 
     /* New heatmap styles */
@@ -623,38 +571,29 @@
     }
 
     .heatmap-section {
-      background: white;
+      background: var(--current-bg-card);
       border-radius: 16px;
       padding: 24px;
       margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(234, 88, 12, 0.08);
+      box-shadow: 0 4px 20px var(--current-shadow);
       transition: background 0.3s, box-shadow 0.3s;
-    }
-
-    body.dark-mode .heatmap-section {
-      background: #292524;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
     .heatmap-title {
       font-size: 15px;
       font-weight: 600;
-      color: #c2410c;
+      color: var(--brand-tertiary);
       margin-bottom: 16px;
     }
 
     body.dark-mode .heatmap-title {
-      color: #fb923c;
+      color: var(--dark-accent-text);
     }
 
     /* Override Cal-Heatmap text colors to match your orange theme */
     #cal-heatmap .ch-domain-text {
-      fill: #9a3412 !important;
+      fill: var(--current-text-sub) !important;
       font-size: 11px !important;
-    }
-
-    body.dark-mode #cal-heatmap .ch-domain-text {
-      fill: #a8a29e !important;
     }
 
     /* Updated footer styles */
@@ -663,7 +602,7 @@
       padding: 24px;
       color: #9ca3af;
       font-size: 13px;
-      border-top: 1px solid #fed7aa;
+      border-top: 1px solid var(--current-border-sub);
       margin-top: 32px;
     }
 
@@ -680,7 +619,7 @@
     }
 
     .footer a {
-      color: #fb923c;
+      color: var(--link-alt-color);
       text-decoration: none;
     }
 
@@ -688,82 +627,9 @@
       text-decoration: underline;
     }
 
-    /* Website Breakdown List Styles */
-    .website-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .website-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .website-label {
-      font-size: 12px;
-      color: #9a3412;
-      width: 120px;
-      /* Slightly wider to accommodate domain names */
-      flex-shrink: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    body.dark-mode .website-label {
-      color: #a8a29e;
-    }
-
-    .website-bar-container,
-    .monthly-bar-container {
-      flex: 1;
-      height: 24px;
-      background: #fef3e2;
-      border-radius: 6px;
-      overflow: hidden;
-      transition: background 0.3s;
-      position: relative;
-      display: flex;
-    }
-
-    body.dark-mode .website-bar-container {
-      background: #44403c;
-    }
-
-    .website-bar {
-      height: 100%;
-      border-radius: 6px;
-      transition: width 0.5s ease-out;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      /* Changed to flex-start */
-      /* Removed padding-right: 8px */
-    }
-
-    .website-bar.empty {
-      background: #fed7aa;
-    }
-
-    body.dark-mode .website-bar.empty {
-      background: #44403c;
-    }
-
-    .website-value,
-    .monthly-value {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 12px;
-    }
-
-    .website-bar {
-      min-width: fit-content;
-      /* Ensures text is never clipped */
-      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-      /* Smoother animation */
+    .heatmap-selected-day {
+      margin-bottom: 20px;
+      display: none;
     }
   </style>
 
@@ -830,74 +696,119 @@
       </div>
     </div>
 
-    <div class="charts-grid">
-      <div class="chart-container">
-        <div class="chart-title">📊 Last 7 Days</div>
-        <div class="bar-chart" id="weekly-chart"></div>
-        <div class="immersion-category-legend">
-          <div class="watching-legend-container category-legend-container">
-            <p>Watching : </p>
-            <div class="watching-legend-color"></div>
-          </div>
-          <div class="reading-legend-container category-legend-container">
-            <p>Reading : </p>
-            <div class="reading-legend-color"></div>
-          </div>
-          <div class="speaking-legend-container category-legend-container">
-            <p>Speaking : </p>
-            <div class="speaking-legend-color"></div>
-          </div>
-        </div>
+    <div class="heatmap-selected-day chart-container" id="selected-day-section">
+      <div class="heatmap-selected-title chart-title">
+        <h3>📆 Selected Day</h3>
       </div>
-      <div class="chart-container">
-        <div class="chart-title">📈 Monthly Overview</div>
-        <div class="monthly-chart" id="monthly-chart"></div>
-        <div class="immersion-category-legend">
-          <div class="watching-legend-container category-legend-container"">
+      <div class="horizontal-bar-chart" id="selected-day-list">
+      </div>
+
+      <div class="immersion-category-legend">
+        <div class="watching-legend-container category-legend-container"">
             <p>Watching : </p>
-            <div class=" watching-legend-color"></div>
-        </div>
-        <div class="reading-legend-container category-legend-container">
-          <p>Reading : </p>
-          <div class="reading-legend-color"></div>
-        </div>
-        <div class="speaking-legend-container category-legend-container">
-          <p>Speaking : </p>
-          <div class="speaking-legend-color"></div>
-        </div>
+            <div class=" watching-legend-color immersion-legend-box"></div>
+      </div>
+      <div class="reading-legend-container category-legend-container">
+        <p>Reading : </p>
+        <div class="reading-legend-color immersion-legend-box"></div>
+      </div>
+      <div class="speaking-legend-container category-legend-container">
+        <p>Speaking : </p>
+        <div class="speaking-legend-color immersion-legend-box"></div>
       </div>
     </div>
   </div>
 
+  <div class="charts-grid">
+    <div class="chart-container">
+      <div>
+        <div class="chart-title">📊 Last 7 Days</div>
+        <div class="bar-chart" id="weekly-chart"></div>
+      </div>
+      <div class="immersion-category-legend">
+        <div class="watching-legend-container category-legend-container">
+          <p>Watching : </p>
+          <div class="watching-legend-color immersion-legend-box"></div>
+        </div>
+        <div class="reading-legend-container category-legend-container">
+          <p>Reading : </p>
+          <div class="reading-legend-color immersion-legend-box"></div>
+        </div>
+        <div class="speaking-legend-container category-legend-container">
+          <p>Speaking : </p>
+          <div class="speaking-legend-color immersion-legend-box"></div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-container">
+      <div>
+        <div class="chart-title">📈 Monthly Overview</div>
+        <div class="horizontal-bar-chart" id="monthly-chart"></div>
+      </div>
+      <div class="immersion-category-legend">
+        <div class="watching-legend-container category-legend-container"">
+            <p>Watching : </p>
+            <div class=" watching-legend-color immersion-legend-box"></div>
+      </div>
+      <div class="reading-legend-container category-legend-container">
+        <p>Reading : </p>
+        <div class="reading-legend-color immersion-legend-box"></div>
+      </div>
+      <div class="speaking-legend-container category-legend-container">
+        <p>Speaking : </p>
+        <div class="speaking-legend-color immersion-legend-box"></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
 
   <div class="charts-grid">
-    <div class="website-list-section">
-      <div class="website-list-section-title">
-        <h3>🌐 Website Breakdown</h3>
-      </div>
-      <div class="website-list" id="website-list">
+    <div class="chart-container">
+      <div>
+        <div class="website-list-section-title">
+          <h3>🌐 Website Breakdown</h3>
+        </div>
+        <div class="horizontal-bar-chart" id="website-list">
+        </div>
 
       </div>
       <div class="immersion-category-legend">
         <div class="watching-legend-container category-legend-container">
           <p>Watching : </p>
-          <div class="watching-legend-color"></div>
+          <div class="watching-legend-color immersion-legend-box"></div>
         </div>
         <div class="reading-legend-container category-legend-container">
           <p>Reading : </p>
-          <div class="reading-legend-color"></div>
+          <div class="reading-legend-color immersion-legend-box"></div>
         </div>
         <div class="speaking-legend-container category-legend-container">
           <p>Speaking : </p>
-          <div class="speaking-legend-color"></div>
+          <div class="speaking-legend-color immersion-legend-box"></div>
         </div>
       </div>
     </div>
     <div class="website-pie-section">
-      <div class="website-pie-section-title">
-        <h3>🌐 Website Pie Chart</h3>
+      <div>
+        <div class="website-pie-section-title">
+          <h3>🌐 Website Pie Chart</h3>
+        </div>
+        <div class="website-pie-chart" id="website-pie-chart">
+        </div>
       </div>
-      <div class="website-pie-chart" id="website-pie-chart">
+      <div class="immersion-category-legend">
+        <div class="watching-legend-container category-legend-container">
+          <p>Watching : </p>
+          <div class="watching-legend-color immersion-legend-box"></div>
+        </div>
+        <div class="reading-legend-container category-legend-container">
+          <p>Reading : </p>
+          <div class="reading-legend-color immersion-legend-box"></div>
+        </div>
+        <div class="speaking-legend-container category-legend-container">
+          <p>Speaking : </p>
+          <div class="speaking-legend-color immersion-legend-box"></div>
+        </div>
       </div>
     </div>
   </div>

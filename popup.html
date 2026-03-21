@@ -1,358 +1,243 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <style>
+    @import "colors.css";
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       width: 320px;
       padding: 20px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-      color: #1c1917;
+      background: var(--current-bg-gradient);
+      color: var(--current-text-main);
       transition: background 0.3s, color 0.3s;
     }
-    
-    /* Dark mode styles */
-    body.dark-mode {
-      background: linear-gradient(135deg, #1c1917 0%, #292524 100%);
-      color: #fafaf9;
-    }
-    
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    
-    .header h1 {
-      font-size: 24px;
-      color: #ea580c;
-      margin-bottom: 4px;
-    }
-    
-    .header h1 .kanji {
-      font-size: 18px;
-      opacity: 0.85;
-    }
-    
-    .header p {
-      font-size: 11px;
-      color: #9a3412;
-    }
-    
-	.header-subtitle {
-	  color: #9a3412;
-	}
-	
-    body.dark-mode .header-subtitle {
-      color: #fdba74;
-    }
-    
+
+    /* Header */
     .header-row {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 20px;
     }
-    
-	.header-content h1 {
-	  color: #ea580c;
-	}
-	
-    .header-content {
-      text-align: left;
+
+    .header-content h1 {
+      color: var(--brand-primary);
+      font-size: 24px;
     }
-    
-	body.dark-mode .header-content h1 {
-	  color: #fb923c;
-	}
-	
+
+    .header-subtitle {
+      font-size: 11px;
+      color: var(--current-text-sub);
+    }
+
     .dark-mode-toggle {
-      background: #f5f5f4;
-      border: 1px solid #e7e5e4;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--current-border);
       border-radius: 8px;
       padding: 6px 10px;
-      font-size: 14px;
       cursor: pointer;
-      transition: all 0.2s;
-      flex-shrink: 0;
     }
-    
-    .dark-mode-toggle:hover {
-      background: #e7e5e4;
-    }
-    
+
     body.dark-mode .dark-mode-toggle {
-      background: #44403c;
-      border-color: #57534e;
-      color: #fafaf9;
+      background: var(--dark-bg-secondary);
     }
-    
-    body.dark-mode .dark-mode-toggle:hover {
-      background: #57534e;
-    }
-    
+
+    /* Buttons */
     .btn-dashboard {
-      display: block;
       width: 100%;
-      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      background: linear-gradient(135deg, var(--heatmap-level-4) 0%, var(--brand-primary) 100%);
       border: none;
       border-radius: 10px;
       padding: 12px 16px;
-      font-size: 13px;
       font-weight: 600;
-      color: white;
+      color: var(--text-on-accent);
       cursor: pointer;
-      transition: all 0.2s;
       margin-bottom: 16px;
+      box-shadow: var(--current-shadow);
     }
-    
-    .btn-dashboard:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
-    }
-    
-    .card {
-      background: white;
+
+    /* Cards & Stats */
+    .card,
+    .stat-box,
+    .manual-timing {
+      background: var(--current-bg-card);
       border-radius: 12px;
       padding: 14px;
       margin-bottom: 12px;
-      box-shadow: 0 2px 8px rgba(234, 88, 12, 0.08);
-      transition: background 0.3s, box-shadow 0.3s;
+      box-shadow: var(--current-shadow);
+      transition: all 0.3s;
     }
-    
-    body.dark-mode .card {
-      background: #292524;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-    
-    .tracking-toggle {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .tracking-info {
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .tracking-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #1c1917;
-    }
-    
-    body.dark-mode .tracking-label {
-      color: #fafaf9;
-    }
-    
-    .tracking-status {
-      font-size: 11px;
-      color: #9a3412;
-    }
-    
-    body.dark-mode .tracking-status {
-      color: #fdba74;
-    }
-    
-    .btn-toggle {
-      background: #22c55e;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-size: 12px;
-      font-weight: 600;
-      color: white;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .btn-toggle:hover {
-      filter: brightness(1.05);
-      transform: scale(1.02);
-    }
-    
-    .btn-toggle.stopped {
-      background: #ef4444;
-    }
-    
-    .status-card {
-      border-left: 4px solid transparent;
-    }
-    
-    .status-card.active {
-      border-left-color: #22c55e;
-      background: linear-gradient(135deg, #f0fdf4 0%, white 100%);
-    }
-    
-    body.dark-mode .status-card.active {
-      background: linear-gradient(135deg, #14532d 0%, #292524 100%);
-    }
-    
-    .status-card.inactive {
-      border-left-color: #d1d5db;
-      background: white;
-    }
-    
-    body.dark-mode .status-card.inactive {
-      border-left-color: #57534e;
-      background: #292524;
-    }
-    
-    .status-card.wrong-lang {
-      border-left-color: #f59e0b;
-      background: linear-gradient(135deg, #fffbeb 0%, white 100%);
-    }
-    
-    body.dark-mode .status-card.wrong-lang {
-      background: linear-gradient(135deg, #78350f 0%, #292524 100%);
-    }
-    
-    .status-card.paused {
-      border-left-color: #ef4444;
-      background: linear-gradient(135deg, #fef2f2 0%, white 100%);
-    }
-    
-    body.dark-mode .status-card.paused {
-      background: linear-gradient(135deg, #7f1d1d 0%, #292524 100%);
-    }
-    
-    .status-text {
-      font-size: 13px;
-      font-weight: 600;
-      color: #1c1917;
-      margin-bottom: 4px;
-    }
-    
-    body.dark-mode .status-text {
-      color: #fafaf9;
-    }
-    
-    .status-subtext {
-      font-size: 11px;
-      color: #78716c;
-    }
-    
-    body.dark-mode .status-subtext {
-      color: #a8a29e;
-    }
-    
-    .status-subtext:empty {
-      display: none;
-    }
-    
-    .btn-force {
-      margin-top: 10px;
-      background: #f5f5f4;
-      border: 1px solid #e7e5e4;
-      border-radius: 6px;
-      padding: 6px 12px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #57534e;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .btn-force:hover {
-      background: #e7e5e4;
-    }
-    
-    body.dark-mode .btn-force {
-      background: #44403c;
-      border-color: #57534e;
-      color: #d6d3d1;
-    }
-    
-    body.dark-mode .btn-force:hover {
-      background: #57534e;
-    }
-    
-    .btn-force.forced {
-      background: #fef3c7;
-      border-color: #fcd34d;
-      color: #92400e;
-    }
-    
-    body.dark-mode .btn-force.forced {
-      background: #78350f;
-      border-color: #b45309;
-      color: #fcd34d;
-    }
-    
+
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
+      margin-bottom: 16px;
     }
-    
-    .stat-box {
-      background: white;
-      border-radius: 10px;
-      padding: 12px 8px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(234, 88, 12, 0.08);
-      transition: background 0.3s, box-shadow 0.3s;
-    }
-    
-    body.dark-mode .stat-box {
-      background: #292524;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-    
+
     .stat-value {
       font-size: 16px;
       font-weight: 700;
-      color: #ea580c;
-      margin-bottom: 2px;
+      color: var(--brand-primary);
     }
-    
+
     .stat-label {
       font-size: 9px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #9a3412;
+      color: var(--current-text-sub);
     }
-    
-    body.dark-mode .stat-label {
-      color: #fdba74;
+
+    /* Status Card Variants */
+    .status-card.active {
+      border-left: 4px solid var(--activity-speaking);
     }
-    
+
+    .status-card.wrong-lang {
+      border-left: 4px solid var(--heatmap-level-3);
+    }
+
+    .status-card.paused {
+      border-left: 4px solid var(--activity-watching);
+    }
+
+    .status-card.inactive {
+      border-left: 4px solid var(--current-border);
+    }
+
+    .status-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--current-text-main);
+      margin-bottom: 4px;
+    }
+
+    .status-subtext {
+      font-size: 11px;
+      color: var(--current-text-sub);
+    }
+
+    .status-subtext:empty {
+      display: none;
+    }
+
+    .btn-force {
+      margin-top: 10px;
+      background: var(--current-bg-secondary);
+      border: 1px solid var(--current-border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--current-text-sub);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-force:hover {
+      background: var(--current-bg-tertiary);
+    }
+
+
+    .btn-force.forced {
+      background: #fef3c7;
+      border-color: #fcd34d;
+      /*color: #92400e;*/
+    }
+
+    /* Manual Timing Refactored */
+    .manual-timing {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .duration-selector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+
+    .duration-selector input {
+      width: 50px;
+      height: 40px;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      border: 2px solid var(--border-secondary);
+      border-radius: 8px;
+      color: var(--brand-primary);
+      background: var(--current-bg-card);
+    }
+
+    .manual-timing label {
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--current-text-sub);
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .manual-timing select,
+    .manual-timing input[type="text"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--current-border);
+      border-radius: 6px;
+      background: var(--current-bg-card);
+      color: var(--current-text-main);
+    }
+
+    .submit-button button {
+      width: 100%;
+      background: var(--brand-primary);
+      color: var(--text-on-accent);
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .submit-button button:hover {
+      background: var(--brand-tertiary);
+    }
+
+    /* Footer */
     .footer {
       margin-top: 16px;
       padding-top: 12px;
-      border-top: 1px solid #fed7aa;
+      border-top: 1px solid var(--border-secondary);
       text-align: center;
       font-size: 10px;
-      color: #9a3412;
+      color: var(--current-text-sub);
     }
-    
-    body.dark-mode .footer {
-      border-top-color: #44403c;
-      color: #a8a29e;
-    }
-    
+
     .footer a {
-      color: #ea580c;
+      color: var(--brand-primary);
       text-decoration: none;
       font-weight: 600;
     }
-    
-    .footer a:hover {
-      text-decoration: underline;
-    }
   </style>
 </head>
+
 <body>
   <div class="header-row">
     <div class="header-content">
-      <h1 style="font-size: 24px; margin-bottom: 4px;">🍊 Mikan <span class="kanji" style="font-size: 18px; opacity: 0.85;">見間</span></h1>
+      <h1 style="font-size: 24px; margin-bottom: 4px;">🍊 Mikan <span class="kanji"
+          style="font-size: 18px; opacity: 0.85;">見間</span></h1>
       <p style="font-size: 11px;" class="header-subtitle">Japanese Immersion Time Tracker</p>
     </div>
     <button class="dark-mode-toggle" id="dark-mode-btn" title="Toggle dark mode">🌙</button>
@@ -383,10 +268,37 @@
     </div>
   </div>
 
+  <form class="manual-timing" id="manual-timing">
+    <div class="duration-selector">
+      <input type="number" id="hours" name="hours" min="0" max="23" value="0">
+      <p>h :</p>
+      <input type="number" id="minutes" name="minutes" min="0" max="59" value="0">
+      <p>m</p>
+    </div>
+    <div class="category-selector">
+      <label for="category">Category:</label>
+      <select type="text" name="category" id="category">
+        <option value="Watching">Watching</option>
+        <option value="Reading">Reading</option>
+        <option value="Speaking">Speaking</option>
+      </select>
+    </div>
+    <div class="website-input">
+      <label for="website">Website (can be left blank):</label>
+      <input type="text" name="website" id="website">
+    </div>
+
+    <div class="submit-button">
+      <button type="sumbit">Add time</button>
+    </div>
+  </form>
+
   <div class="footer">
-    Created by <a href="https://www.youtube.com/JouzuJuls" target="_blank" rel="noopener">Jouzu Juls</a> · <a href="https://ko-fi.com/jouzujuls" target="_blank" rel="noopener">☕ Support on Ko-fi</a> · © 2026
+    Created by <a href="https://www.youtube.com/JouzuJuls" target="_blank" rel="noopener">Jouzu Juls</a> · <a
+      href="https://ko-fi.com/jouzujuls" target="_blank" rel="noopener">☕ Support on Ko-fi</a> · © 2026
   </div>
 
   <script src="popup.js"></script>
 </body>
+
 </html>

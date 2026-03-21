@@ -51,7 +51,7 @@ async function updateStats() {
     let result = await browserAPI.runtime.sendMessage({ type: 'getDayTotal', date: dateString });
 
     if (i == 0) {
-      todaySeconds += result;
+      todaySeconds = result;
     }
     if (i < dayOfWeek) {
       weekSeconds += result;
@@ -180,8 +180,29 @@ browserAPI.storage.local.get(['darkModeEnabled'], (result) => {
 
 setInterval(() => {
   updateStats();
+  updateStatus();
 }, 1000);
 
-setInterval(() => {
-  updateStatus();
-}, 3000);
+document.getElementById("manual-timing").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const category = document.getElementById("category").value.trim();
+  const hours = Number(document.getElementById("hours").value);
+  const minutes = Number(document.getElementById("minutes").value);
+  const website = document.getElementById("website").value;
+  const time = minutes * 60 + hours * 60 * 60;
+
+
+  const today = new Date().toISOString().split("T")[0];
+
+
+  await browserAPI.runtime.sendMessage({
+    type: 'addTime',
+    category: category,
+    date: today,
+    website: website,
+    time: time
+  }).catch(e => console.error('Mikan Content: Error sending updateIcon message:', e));
+
+  updateStats();
+
+})
