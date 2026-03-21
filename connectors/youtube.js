@@ -9,35 +9,11 @@ class YoutubeConnector extends VideoConnector {
 
     console.log("Mikan: creating youtube connector")
 
-
-    this.videoDetails = undefined;
-    this.videoId = "";
     this.title = "";
-    this.channelName = "";
-    this.captions = [];
-    this.languages = [];
+  }
 
-
-    const s = document.createElement('script');
-    s.src = browserAPI.runtime.getURL("connectors/youtube-request-interceptor.js");
-    document.documentElement.appendChild(s);
-
-    window.addEventListener("message", (event) => {
-      // SECURITY: Always check the source to ignore messages from other scripts
-      //if (event.source !== window) return;
-
-      if (event.data && event.data.source === 'youtube-request-intercerptor') {
-        console.log("MIKAN: message is from interceptor", event);
-
-        this.videoDetails = event.data.videoDetails;
-        this.videoId = this.videoDetails.videoId;
-        this.title = this.videoDetails.title || '';
-        this.channelName = this.videoDetails.author || '';
-
-        this.captions = event.data.captions?.playerCaptionsTracklistRenderer?.captionTracks || [];
-        this.languages = this.captions.map(t => t.languageCode);
-      }
-    }, false);
+  scrapData() {
+    this.title = document.querySelector('h1 > yt-formatted-string')?.textContent || document.querySelector("h2.ytShortsVideoTitleViewModelShortsVideoTitle")?.textContent;
   }
 
   getName() {
@@ -45,17 +21,14 @@ class YoutubeConnector extends VideoConnector {
   }
 
   getTargetLanguage() {
-    let hasJapaneseCaptions = false;
+    this.scrapData();
 
-    for (let i = 0; i < this.languages.length; i++) {
-      if (this.languages[i] == "ja") {
-        hasJapaneseCaptions = true;
-        break;
-      }
+    if (!this.title || this.title == "") {
+      return "";
     }
 
     // Analyze Japanese content
-    const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF]/;
+    //const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF]/;
     const hiraganaKatakana = (this.title.match(/[\u3040-\u309F\u30A0-\u30FF]/g) || []).length;
     const kanji = (this.title.match(/[\u4E00-\u9FAF]/g) || []).length;
     const totalJapanese = hiraganaKatakana + kanji;
@@ -63,29 +36,19 @@ class YoutubeConnector extends VideoConnector {
 
     const hasKana = hiraganaKatakana > 0;
     const japaneseRatio = titleLength > 0 ? totalJapanese / titleLength : 0;
-    const channelHasKana = japaneseRegex.test(this.channelName);
 
     let isJapanese = false;
-    let reason = '';
 
-    // Japanese captions = definitely Japanese
-    if (hasJapaneseCaptions) {
+    if (hasKana && japaneseRatio > 0.3) {
       isJapanese = true;
-      reason = `Japanese captions found[${this.languages.join(', ')}]`;
     }
-    // No Japanese captions (or no captions at all) = use heuristics
-    else if (hasKana && japaneseRatio > 0.3) {
-      isJapanese = true;
-      reason = `Heuristics: Has kana + ${(japaneseRatio * 100).toFixed(0)}% Japanese chars(> 30 % threshold)`;
-    } else if (channelHasKana && japaneseRatio > 0.1) {
-      isJapanese = true;
-      reason = `Heuristics: Channel has kana + ${(japaneseRatio * 100).toFixed(0)}% Japanese chars(> 10 % threshold)`;
-    } else {
+    // else if (japaneseRatio > 0.1) {
+    //   isJapanese = true;
+    //   reason = `Heuristics: Channel has kana + ${(japaneseRatio * 100).toFixed(0)}% Japanese chars(> 10 % threshold)`;
+    // } 
+    else {
       isJapanese = false;
-      reason = `Heuristics: ${(japaneseRatio * 100).toFixed(0)}% Japanese chars, hasKana = ${hasKana}, channelHasKana = ${channelHasKana} `;
     }
-
-    console.log(`Mikan Content: Detected video language: ${isJapanese ? 'JAPANESE' : 'NOT JAPANESE'}`);
 
     if (isJapanese) {
       return "ja";

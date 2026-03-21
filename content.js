@@ -61,14 +61,23 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
   }
 
   function refreshShouldTrack() {
-    shouldTrack = true;
 
-    getCurrentTargetLanguage();
-    refreshIsActive();
     refreshIsWatchPage();
-    if (!isTargetLanguage || !isWatchPage || !isActive) {
+    if (!isWatchPage) {
       shouldTrack = false;
+      return;
     }
+    refreshIsActive();
+    if (!isActive) {
+      shouldTrack = false;
+      return;
+    }
+    getCurrentTargetLanguage();
+    if (!isTargetLanguage) {
+      shouldTrack = false;
+      return;
+    }
+    shouldTrack = true;
   }
 
 
@@ -142,9 +151,10 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
           checkAndInit();
         }
 
-        refreshShouldTrack();
-        refreshIsActive();
-        refreshIsWatchPage();
+        // if we are already tracking, the tracking function is already refreshing
+        if (lastShouldTrack !== true) {
+          refreshShouldTrack();
+        }
 
         if (lastShouldTrack != shouldTrack || lastIsActive != isActive || isWatchPage != lastIsWatchPage) {
           refresh();

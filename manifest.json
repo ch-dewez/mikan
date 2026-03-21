@@ -53,7 +53,6 @@
         "connectors/connector.js",
         "connectors/video-connector.js",
         "connectors/youtube.js",
-        "connectors/youtube-request-interceptor.js",
         "connectors/cijapanese.js",
         "connectors/any-website.js",
         "connectors/ttsu.js" 
