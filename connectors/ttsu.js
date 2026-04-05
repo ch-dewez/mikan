@@ -8,7 +8,7 @@ class CijConnector extends Connector {
     this.lastPercentageValue = "";
     this.nbTimeAFK = 0;
 
-    this.aftThreshold = 120; // 0.5 * 120 = 1 minute
+    this.aftThreshold = 480; // 0.5 * 480 = 5 minutes
   }
 
   getName() {
@@ -36,7 +36,7 @@ class CijConnector extends Connector {
   }
 
   getPercentageValue() {
-    return document.getElementsByClassName("mr-4")[0].textContent;
+    return document.querySelector("#ttu-page-footer > .writing-horizontal-tb").textContent;
   }
 
   getTimeSinceLastCall() {
