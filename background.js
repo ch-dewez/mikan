@@ -55,5 +55,27 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
     getAllData()
       .then((data) => sendResponse(data));
     return true;
+  } else if (message.type === "getTopHost") {
+    const url = new URL(sender.tab.url);
+    sendResponse(url.host);
   }
+  // Router, a frame is active, tell other frame to stop
+  else if (message.type === "broadcastMikanActive" && sender.tab) {
+    const tabId = sender.tab.id;
+    const sourceFrameId = sender.frameId;
+
+    browserAPI.webNavigation.getAllFrames({ tabId })
+      .then((allFrames) => {
+        for (const frame of allFrames) {
+
+          if (frame.frameId !== sourceFrameId) {
+            browserAPI.tabs.sendMessage(tabId, {
+              type: "MikanActive",
+            }, { frameId: frame.frameId })
+              .catch((e) => console.log("Mikan: error when broadcasting MikanActive:", e));
+          }
+        }
+      });
+  }
+  return false;
 });
