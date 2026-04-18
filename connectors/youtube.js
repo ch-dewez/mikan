@@ -43,8 +43,6 @@ class YoutubeConnector extends VideoConnector {
 
 
     this.videoDetails = initialPlayerResponse?.videoDetails ?? undefined;
-    let captions = initialPlayerResponse?.captions.playerCaptionsTracklistRenderer?.captionTracks ?? [];
-    this.captionLanguages = captions.map(t => t.languageCode);
 
     const urlMatch = window.location.href.match(/[?&]v=([^&]+)/) ||
       window.location.pathname.match(/\/shorts\/([^/?]+)/);
@@ -53,7 +51,6 @@ class YoutubeConnector extends VideoConnector {
     // the videoId of the player response does not match the current video. the this.title will still be used
     if (this.videoDetails.videoId != urlVideoId) {
       this.videoDetails = undefined;
-      this.captionLanguages = undefined;
     }
 
     this.title = document.querySelector('h1 > yt-formatted-string')?.textContent || document.querySelector("h2.ytShortsVideoTitleViewModelShortsVideoTitle")?.textContent;
@@ -72,12 +69,10 @@ class YoutubeConnector extends VideoConnector {
 
     let title = "";
     let channelName = "";
-    let hasJapaneseCaptions = false;
 
     if (this.videoDetails) {
       title = this.videoDetails.title;
       channelName = this.videoDetails.channelName || this.videoDetails.author;
-      hasJapaneseCaptions = this.captionLanguages.includes('ja');
     } else {
       title = this.title;
     }
@@ -96,13 +91,7 @@ class YoutubeConnector extends VideoConnector {
     let isJapanese = false;
     //let reason = '';
 
-    // Japanese captions = definitely Japanese
-    if (hasJapaneseCaptions) {
-      isJapanese = true;
-      //reason = `Japanese captions found [${captionLanguages.join(', ')}]`;
-    }
-    // No Japanese captions (or no captions at all) = use heuristics
-    else if (hasKana && japaneseRatio > 0.3) {
+    if (hasKana && japaneseRatio > 0.3) {
       isJapanese = true;
       //reason = `Heuristics: Has kana + ${(japaneseRatio * 100).toFixed(0)}% Japanese chars (>30% threshold)`;
     } else if (channelHasKana && japaneseRatio > 0.1) {
