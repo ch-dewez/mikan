@@ -31,6 +31,11 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
       connectorPath: "connectors/ttsu.js",
       all_frames: false
     },
+    {
+      url: "news.web.nhk",
+      connectorPath: "connectors/nhk.js",
+      all_frames: false
+    },
   ];
 
   let host;
@@ -198,6 +203,8 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
       clearInterval(trackingIntervalId);
     }
 
+    updateIconState();
+
     if (!isWatchPage) {
       console.log('Mikan Content: initializeTracker: Not a watch page, skipping');
       return;
@@ -228,7 +235,6 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
       });
     }
 
-    updateIconState();
     startTracking();
 
     console.log('Mikan Content: Tracker initialized successfully.');

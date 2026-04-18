@@ -1,4 +1,4 @@
-import VideoConnector from "./video-connector.js";
+import VideoConnector from "./template/video-connector.js";
 
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 

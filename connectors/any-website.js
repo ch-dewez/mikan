@@ -1,5 +1,5 @@
 // connectors/any-website.js
-import VideoConnector from "./video-connector.js";
+import VideoConnector from "./template/video-connector.js";
 
 class AnyWebsiteConnector extends VideoConnector {
   constructor() {

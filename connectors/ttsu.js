@@ -1,14 +1,9 @@
-import Connector from "./connector.js";
+import TimerAfkConnector from "./template/timer-afk-connector.js";
 
 // connectors/cijapanese.js
-class CijConnector extends Connector {
+class TtsuConnector extends TimerAfkConnector {
   constructor() {
     super();
-    this.lastTime = undefined;
-    this.lastPercentageValue = "";
-    this.nbTimeAFK = 0;
-
-    this.aftThreshold = 480; // 0.5 * 480 = 5 minutes
   }
 
   getName() {
@@ -31,43 +26,8 @@ class CijConnector extends Connector {
     return [];
   }
 
-  isAdPlaying() {
-    return false;// can't detect
-  }
-
   getPercentageValue() {
     return document.querySelector("#ttu-page-footer > .writing-horizontal-tb").textContent;
-  }
-
-  getTimeSinceLastCall() {
-    if (!this.lastTime) {
-      this.lastTime = new Date();
-      return 0;
-    }
-
-    let percentageValue = this.getPercentageValue();
-    if (this.lastPercentageValue == percentageValue) {
-      this.nbTimeAFK += 1;
-    } else {
-      this.lastPercentageValue = percentageValue;
-      this.nbTimeAFK = 0;
-    }
-
-    if (this.nbTimeAFK > this.aftThreshold) {
-      this.lastTime = new Date();
-      return 0;
-    }
-
-    let currentTime = new Date();
-    let diffMs = currentTime - this.lastTime;
-    let diffSec = diffMs / 1000.0;
-
-    this.lastTime = currentTime;
-    return diffSec;
-  }
-
-  resetTime() {
-    this.lastTime = undefined;
   }
 
   getCategory() {
@@ -77,6 +37,6 @@ class CijConnector extends Connector {
 };
 
 export default function connectorFactory() {
-  return new CijConnector();
+  return new TtsuConnector();
 }
 

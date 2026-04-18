@@ -1,4 +1,4 @@
-import VideoConnector from "./video-connector.js";
+import VideoConnector from "./template/video-connector.js";
 
 // connectors/cijapanese.js
 class CijConnector extends VideoConnector {
