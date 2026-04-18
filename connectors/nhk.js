@@ -5,7 +5,22 @@ class NHKConnector extends TimerAfkConnector {
     super();
   }
 
+  isEasyVersion() {
+    let location = window.location.href;
+    let isNHKeasy = location.includes("/news/easy") && !(location.endsWith("easy/") || location.endsWith("easy"));
+    return isNHKeasy;
+  }
+
+  isNormalVersion() {
+    let location = window.location.href;
+    let isNHK = location.includes("/newsweb/na/na");
+    return isNHK;
+  }
+
   getName() {
+    if (this.isEasyVersion()) {
+      return "NHK news easy";
+    }
     return "NHK news";
   }
 
@@ -14,11 +29,7 @@ class NHKConnector extends TimerAfkConnector {
   }
 
   isWatchPage() {
-    let location = window.location.href;
-    let isNHKeasy = location.includes("/news/easy") && !(location.endsWith("easy/") || location.endsWith("easy"));
-    let isNHK = location.includes("/newsweb/na/na");
-
-    return isNHK || isNHKeasy;
+    return this.isEasyVersion() || this.isNormalVersion();
   }
 
   isActive() {
