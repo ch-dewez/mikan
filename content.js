@@ -17,25 +17,30 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
   const siteConnectors = [
     {
-      url: "youtube.com",
+      url: ["youtube.com"],
       connectorPath: "connectors/youtube.js",
       all_frames: false
     },
     {
-      url: "cijapanese.com",
+      url: ["cijapanese.com"],
       connectorPath: "connectors/cijapanese.js",
       all_frames: false
     },
     {
-      url: "reader.ttsu.app",
+      url: ["reader.ttsu.app"],
       connectorPath: "connectors/ttsu.js",
       all_frames: false
     },
     {
-      url: "news.web.nhk",
+      url: ["news.web.nhk"],
       connectorPath: "connectors/nhk.js",
       all_frames: false
     },
+    {
+      url: ["yasashii.asahi.com", "asahi.com"],
+      connectorPath: "connectors/asahi.js",
+      all_frames: false
+    }
   ];
 
   let host;
@@ -44,7 +49,7 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
   } catch {
     host = (await browserAPI.runtime.sendMessage({ type: "getTopHost" })).replace('www.', '');
   }
-  let connectorInfo = siteConnectors.find((e) => e.url == host);
+  let connectorInfo = siteConnectors.find((e) => e.url.includes(host));
 
   if (!connectorInfo) {
     const anyWebsiteInfo = {

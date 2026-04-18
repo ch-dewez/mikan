@@ -1,12 +1,19 @@
 import TimerAfkConnector from "./template/timer-afk-connector.js";
 
-class NHKConnector extends TimerAfkConnector {
+class AsashiConnector extends TimerAfkConnector {
   constructor() {
     super();
   }
 
+  isEasyVersion() {
+    return window.top.location.hostname.replace('www.', '').includes("yasashii");
+  }
+
   getName() {
-    return "NHK news";
+    if (this.isEasyVersion()) {
+      return "やさしい朝日新聞"
+    }
+    return "朝日新聞";
   }
 
   getTargetLanguage() {
@@ -15,10 +22,7 @@ class NHKConnector extends TimerAfkConnector {
 
   isWatchPage() {
     let location = window.location.href;
-    let isNHKeasy = location.includes("/news/easy") && !(location.endsWith("easy/") || location.endsWith("easy"));
-    let isNHK = location.includes("/newsweb/na/na");
-
-    return isNHK || isNHKeasy;
+    return location.includes("/articles/");
   }
 
   isActive() {
@@ -28,10 +32,9 @@ class NHKConnector extends TimerAfkConnector {
   getCategory() {
     return "Reading"
   }
-
 };
 
 export default function connectorFactory() {
-  return new NHKConnector();
+  return new AsashiConnector();
 }
 

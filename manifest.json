@@ -50,16 +50,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "connectors/template/connector.js",
-        "connectors/template/video-connector.js",
-        "connectors/template/timer-connector.js",
-        "connectors/template/timer-afk-connector.js",
-
-        "connectors/youtube.js",
-        "connectors/cijapanese.js",
-        "connectors/any-website.js",
-        "connectors/ttsu.js",
-        "connectors/nhk.js"
+        "connectors/*"
       ],
       "matches": [
         "<all_urls>"
