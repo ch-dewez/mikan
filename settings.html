@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mikan Settings</title>
+</head>
+
+<body>
+  <div class="header">
+    <button class="dark-mode-toggle" id="dark-mode-btn" title="Toggle dark mode">🌙</button>
+    <h1>🍊 Mikan <span class="kanji">見間</span></h1>
+    <p>Japanese Immersion Time Tracker</p>
+  </div>
+
+  <details>
+    <summary>Data management</summary>
+    <div>
+      <p>Manually migrate data from Jouzu Jul's extension to this fork. Warning: no data validation is being done at the
+        moment.</p>
+      <input type="file" id="migrateFileInput">
+      <button id="migrationButton">Replace data</button>
+      <p id="migrationError"></p>
+      <p id="migrationSuccess"></p>
+    </div>
+
+    <div>
+      <p>Import data from json file. Warning: no data validation is being done at the moment.</p>
+      <input type="file" id="importFileInput">
+      <button id="importButton">Import Data</button>
+      <p id="importError"></p>
+      <p id="importSuccess"></p>
+    </div>
+
+    <div>
+      <button id="exportButton">Export Data</button>
+      <p id="exportError"></p>
+    </div>
+
+  </details>
+
+  <script src="settings.js"></script>
+
+</body>
+
+</html>

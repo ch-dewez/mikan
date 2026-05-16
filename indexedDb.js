@@ -167,3 +167,31 @@ export async function getAllDataCategory(category) {
   });
 }
 
+export async function deleteAllData() {
+  let p1 = deleteDataCategory("Reading");
+  let p2 = deleteDataCategory("Watching");
+  let p3 = deleteDataCategory("Speaking");
+  await Promise.all([p1, p2, p3]);
+}
+
+export async function deleteDataCategory(category) {
+  const transaction = db.transaction([category], 'readwrite');
+  const store = transaction.objectStore(category);
+
+  store.clear();
+}
+
+export async function replaceAllData(data) {
+  await deleteAllData();
+  for (let key in data) {
+    let categoryData = data[key];
+    for (let dayData of categoryData) {
+      for (let website in dayData.websites) {
+        let time = dayData.websites[website];
+        addTime(key, dayData.date, website, time);
+      }
+
+    }
+  }
+}
+

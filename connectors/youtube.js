@@ -48,7 +48,7 @@ class YoutubeConnector extends VideoConnector {
     const urlVideoId = urlMatch?.[1];
 
     // the videoId of the player response does not match the current video. the this.title will still be used
-    if (this.videoDetails.videoId != urlVideoId) {
+    if (this.videoDetails?.videoId != urlVideoId) {
       this.videoDetails = undefined;
     }
 

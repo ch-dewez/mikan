@@ -157,6 +157,11 @@ document.getElementById('dashboard-btn').addEventListener('click', () => {
   browserAPI.tabs.create({ url: browserAPI.runtime.getURL('dashboard.html') });
 });
 
+
+document.getElementById('settings-btn').addEventListener('click', () => {
+  browserAPI.tabs.create({ url: browserAPI.runtime.getURL('settings.html') });
+});
+
 document.getElementById('dark-mode-btn').addEventListener('click', () => {
   darkModeEnabled = !darkModeEnabled;
   browserAPI.storage.local.set({ darkModeEnabled });
@@ -183,7 +188,7 @@ setInterval(() => {
   updateStatus();
 }, 1000);
 
-function isValidDate(inDate){
+function isValidDate(inDate) {
   var date = new Date(inDate);
 }
 

@@ -1,4 +1,4 @@
-import { addTime, getAllData, getDayTotal, removeTime } from "./indexedDb.js";
+import { addTime, deleteAllData, getAllData, getDayTotal, removeTime, replaceAllData } from "./indexedDb.js";
 
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
@@ -55,6 +55,10 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
     getAllData()
       .then((data) => sendResponse(data));
     return true;
+  } else if (message.type === "deleteAllData") {
+    deleteAllData()
+  } else if (message.type === "replaceAllData") {
+    replaceAllData(message.data)
   } else if (message.type === "getTopHost") {
     const url = new URL(sender.tab.url);
     sendResponse(url.host);

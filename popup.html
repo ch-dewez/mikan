@@ -29,6 +29,10 @@
       margin-bottom: 20px;
     }
 
+    .header-content {
+      margin-right: 20px;
+    }
+
     .header-content h1 {
       color: var(--brand-primary);
       font-size: 24px;
@@ -39,15 +43,15 @@
       color: var(--current-text-sub);
     }
 
-    .dark-mode-toggle {
+    .button-emoji {
       background: var(--bg-tertiary);
       border: 1px solid var(--current-border);
       border-radius: 8px;
-      padding: 6px 10px;
+      padding: 6px 6px;
       cursor: pointer;
     }
 
-    body.dark-mode .dark-mode-toggle {
+    body.dark-mode .button-emoji {
       background: var(--dark-bg-secondary);
     }
 
@@ -262,7 +266,8 @@
           style="font-size: 18px; opacity: 0.85;">見間</span></h1>
       <p style="font-size: 11px;" class="header-subtitle">Japanese Immersion Time Tracker</p>
     </div>
-    <button class="dark-mode-toggle" id="dark-mode-btn" title="Toggle dark mode">🌙</button>
+    <button class="button-emoji" id="dark-mode-btn" title="Toggle dark mode">🌙</button>
+    <a class="button-emoji" id="settings-btn" title="Go To Settings">⚙️</a>
   </div>
 
   <button class="btn-dashboard" id="dashboard-btn">
